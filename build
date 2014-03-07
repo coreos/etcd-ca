@@ -1,0 +1,16 @@
+#!/bin/bash -e
+
+proj_dir="github.com/coreos/"
+proj_name="etcd-ca"
+proj_path=$proj_dir$proj_name
+
+if [ ! -h src/$proj_path ]; then
+	mkdir -p src/$proj_dir
+	ln -s ../../.. src/$proj_path
+fi
+
+export GOBIN=${PWD}/bin
+export GOPATH=${PWD}
+
+echo "Building $proj_name"
+go install $proj_path
