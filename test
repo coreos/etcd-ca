@@ -3,7 +3,7 @@
 source ./build
 
 if [ -z "$PKG" ]; then
-    PKG="tests"
+    PKG="depot tests"
 fi
 
 cover=false
