@@ -7,9 +7,14 @@ import (
 )
 
 const (
-	name = "host.pem"
 	data = "It is a trap only!"
 	dir = ".etcd-ca"
+)
+
+var (
+	tag = &Tag{"host.pem", 0600}
+	wrongTag = &Tag{"host.pem", 0666}
+	wrongTag2 = &Tag{"host.pem2", 0600}
 )
 
 func getDepot(t *testing.T) Depot {
@@ -26,26 +31,25 @@ func getDepot(t *testing.T) Depot {
 func TestDepotCRUD(t *testing.T) {
 	d := getDepot(t)
 
-	if err := d.Put(name, []byte(data), 0666); err != nil {
+	if err := d.Put(tag, []byte(data)); err != nil {
 		t.Fatal("Failed putting file into Depot:", err)
 	}
 
-	dataRead, err := d.Get(name)
+	dataRead, err := d.Get(tag)
 	if err != nil {
 		t.Fatal("Failed getting file from Depot:", err)
 	}
-
 	if bytes.Compare(dataRead, []byte(data)) != 0 {
 		t.Fatal("Failed getting the previous data")
 	}
 
-	if err = d.Put(name, []byte(data), 0666); err == nil || !os.IsExist(err) {
+	if err = d.Put(tag, []byte(data)); err == nil || !os.IsExist(err) {
 		t.Fatal("Expect not to put file into Depot:", err)
 	}
 
-	d.Delete(name)
+	d.Delete(tag)
 
-	if _, err = d.Get(name); err == nil || !os.IsNotExist(err) {
+	if d.Check(tag) {
 		t.Fatal("Failed deleting file from Depot:", err)
 	}
 }
@@ -53,13 +57,49 @@ func TestDepotCRUD(t *testing.T) {
 func TestDepotPutNil(t *testing.T) {
 	d := getDepot(t)
 
-	if err := d.Put(name, nil, 0666); err == nil {
+	if err := d.Put(tag, nil); err == nil {
 		t.Fatal("Expect not to put nil into Depot:", err)
 	}
 
-	if err := d.Put(name, []byte(data), 0666); err != nil {
+	if err := d.Put(tag, []byte(data)); err != nil {
 		t.Fatal("Failed putting file into Depot:", err)
 	}
 
-	d.Delete(name)
+	d.Delete(tag)
+}
+
+func TestDepotCheckFailure(t *testing.T) {
+	d := getDepot(t)
+
+	if err := d.Put(tag, []byte(data)); err != nil {
+		t.Fatal("Failed putting file into Depot:", err)
+	}
+
+	if d.Check(wrongTag) {
+		t.Fatal("Expect not to checking out file with insufficient permission")
+	}
+
+	if d.Check(wrongTag2) {
+		t.Fatal("Expect not to checking out file with nonexist name")
+	}
+
+	d.Delete(tag)
+}
+
+func TestDepotGetFailure(t *testing.T) {
+	d := getDepot(t)
+
+	if err := d.Put(tag, []byte(data)); err != nil {
+		t.Fatal("Failed putting file into Depot:", err)
+	}
+
+	if _, err := d.Get(wrongTag); err == nil {
+		t.Fatal("Expect not to checking out file with insufficient permission")
+	}
+
+	if _, err := d.Get(wrongTag2); err == nil {
+		t.Fatal("Expect not to checking out file with nonexist name")
+	}
+
+	d.Delete(tag)
 }

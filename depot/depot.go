@@ -7,17 +7,25 @@ import (
 	"path/filepath"
 )
 
+type Tag struct {
+	name string
+	// TODO(yichengq): make perm module take in charge later
+	perm os.FileMode
+}
+
 // Depot is in charge of data storage
 type Depot interface {
-	Put(name string, data []byte, perm os.FileMode) error
-	Get(name string) ([]byte, error)
-	Delete(name string)
+	Put(tag *Tag, data []byte) error
+	Get(tag *Tag) ([]byte, error)
+	Delete(tag *Tag) error
+	Check(tag *Tag) bool
 }
+
 
 // FileDepot is a implementation of Depot using file system
 type FileDepot struct {
 	// Absolute path of directory that holds all files
-	Dir string
+	dirPath string
 }
 
 func New(dir string) (*FileDepot, error) {
@@ -32,26 +40,29 @@ func New(dir string) (*FileDepot, error) {
 }
 
 func (d *FileDepot) path(name string) string {
-	return filepath.Join(d.Dir, name)
+	return filepath.Join(d.dirPath, name)
 }
 
-func (d *FileDepot) Put(name string, data []byte, perm os.FileMode) error {
+func (d *FileDepot) Put(tag *Tag, data []byte) error {
 	if data == nil {
 		return errors.New("data is nil")
 	}
 
-	if err := os.MkdirAll(d.Dir, 0755); err != nil {
+	if err := os.MkdirAll(d.dirPath, 0755); err != nil {
 		return err
 	}
 
-	file, err := os.OpenFile(d.path(name), os.O_WRONLY|os.O_CREATE|os.O_EXCL, perm)
+	name := d.path(tag.name)
+	perm := tag.perm
+
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_EXCL, perm)
 	if err != nil {
 		return err
 	}
 
 	if _, err := file.Write(data); err != nil {
 		file.Close()
-		os.Remove(d.path(name))
+		os.Remove(name)
 		return err
 	}
 
@@ -59,10 +70,21 @@ func (d *FileDepot) Put(name string, data []byte, perm os.FileMode) error {
 	return nil
 }
 
-func (d *FileDepot) Get(name string) ([]byte, error) {
-	return ioutil.ReadFile(d.path(name))
+func (d *FileDepot) Check(tag *Tag) bool {
+	name := d.path(tag.name)
+	if fi, err := os.Stat(name); err == nil && ^fi.Mode() & tag.perm == 0 {
+		return true
+	}
+	return false
 }
 
-func (d *FileDepot) Delete(name string) {
-	os.Remove(d.path(name))
+func (d *FileDepot) Get(tag *Tag) ([]byte, error) {
+	if !d.Check(tag) {
+		return nil, errors.New("permission denied")
+	}
+	return ioutil.ReadFile(d.path(tag.name))
+}
+
+func (d *FileDepot) Delete(tag *Tag) error {
+	return os.Remove(d.path(tag.name))
 }
