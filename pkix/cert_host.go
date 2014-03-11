@@ -44,6 +44,8 @@ var (
 	}
 )
 
+// CreateCertificateHost creates certificate for host.
+// The arguments include CA certificate, CA certificate info, CA key, certificate request.
 func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo, keyAuth *Key, csr *CertificateSigningRequest) (*Certificate, error) {
 	hostTemplate.SerialNumber.Set(info.SerialNumber)
 	info.IncSerialNumber()

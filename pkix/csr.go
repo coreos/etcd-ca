@@ -78,7 +78,7 @@ func (c *CertificateSigningRequest) buildPKCS10CertificateSigningRequest() error
 	return nil
 }
 
-// GetRawCertificateSigningRequest gets jstemmer/pkcs10-format CertificateSigningRequest
+// GetRawCertificateSigningRequest returns a copy of this certificate request as an pkcs10.Certificate
 func (c *CertificateSigningRequest) GetRawCertificateSigningRequest() (*pkcs10.CertificateSigningRequest, error) {
 	if err := c.buildPKCS10CertificateSigningRequest(); err != nil {
 		return nil, err

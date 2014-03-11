@@ -57,7 +57,7 @@ func (c *Certificate) buildX509Certificate() error {
 	return nil
 }
 
-// GetRawCertificate gets crypto/x509-format Certificate
+// GetRawCertificate returns a copy of this certificate as an x509.Certificate
 func (c *Certificate) GetRawCertificate() (*x509.Certificate, error) {
 	if err := c.buildX509Certificate(); err != nil {
 		return nil, err
