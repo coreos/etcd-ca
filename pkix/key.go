@@ -19,15 +19,24 @@ const (
 	rsaBits = 1024
 )
 
+// CreateRSAKey creates a new Key using RSA algorithm
+func CreateRSAKey() (*Key, error) {
+	priv, err := rsa.GenerateKey(rand.Reader, rsaBits)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewKey(&priv.PublicKey, priv), nil
+}
+
 type Key struct {
-	pub          crypto.PublicKey
-	priv         crypto.PrivateKey
-	privPEMBlock *pem.Block
+	Public  crypto.PublicKey
+	Private crypto.PrivateKey
 	// TODO(yichengq): add pemEncryptedBlock *pem.Block
 }
 
 func NewKey(pub crypto.PublicKey, priv crypto.PrivateKey) *Key {
-	return &Key{pub: pub, priv: priv}
+	return &Key{Public: pub, Private: priv}
 }
 
 // NewKeyFromRSAPrivateKeyPEM inits Key from PEM-format rsa private key bytes
@@ -45,45 +54,25 @@ func NewKeyFromRSAPrivateKeyPEM(data []byte) (*Key, error) {
 		return nil, err
 	}
 
-	return &Key{&priv.PublicKey, priv, pemBlock}, nil
-}
-
-// CreateRSAKey creates a new Key using RSA algorithm
-func CreateRSAKey() (*Key, error) {
-	priv, err := rsa.GenerateKey(rand.Reader, rsaBits)
-	if err != nil {
-		return nil, err
-	}
-
 	return NewKey(&priv.PublicKey, priv), nil
-}
-
-func (k *Key) buildPrivatePEMBlock() error {
-	if k.privPEMBlock != nil {
-		return nil
-	}
-
-	switch priv := k.priv.(type) {
-	case *rsa.PrivateKey:
-		privBytes := x509.MarshalPKCS1PrivateKey(priv)
-		k.privPEMBlock = &pem.Block{
-			Type:  rsaPrivateKeyPEMBlockType,
-			Bytes: privBytes,
-		}
-	default:
-		return errors.New("only RSA private key is supported")
-	}
-	return nil
 }
 
 // ExportPrivate exports PEM-format private key
 func (k *Key) ExportPrivate() ([]byte, error) {
-	if err := k.buildPrivatePEMBlock(); err != nil {
-		return nil, err
+	var privPEMBlock *pem.Block
+	switch priv := k.Private.(type) {
+	case *rsa.PrivateKey:
+		privBytes := x509.MarshalPKCS1PrivateKey(priv)
+		privPEMBlock = &pem.Block{
+			Type:  rsaPrivateKeyPEMBlockType,
+			Bytes: privBytes,
+		}
+	default:
+		return nil, errors.New("only RSA private key is supported")
 	}
 
 	buf := new(bytes.Buffer)
-	if err := pem.Encode(buf, k.privPEMBlock); err != nil {
+	if err := pem.Encode(buf, privPEMBlock); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil
@@ -97,10 +86,10 @@ type rsaPublicKey struct {
 
 // GenerateSubjectKeyId generates SubjectKeyId used in Certificate
 // Id is 160-bit SHA-1 hash of the value of the BIT STRING subjectPublicKey
-func (k *Key) GenerateSubjectKeyId() ([]byte, error) {
+func GenerateSubjectKeyId(pub crypto.PublicKey) ([]byte, error) {
 	var pubBytes []byte
 	var err error
-	switch pub := k.pub.(type) {
+	switch pub := pub.(type) {
 	case *rsa.PublicKey:
 		pubBytes, err = asn1.Marshal(rsaPublicKey{
 			N: pub.N,

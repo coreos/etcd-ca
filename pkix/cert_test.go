@@ -48,6 +48,20 @@ SCP/620bWJMxqNAYdwpiyGibsiUlueWB/3aavoq10MIHA6MBxw/wrsoLPns9f7dP
 +ddM40NjuI1tvX6SnUwuahONdvUJDxqVR+AM
 -----END WRONG CERTIFICATE-----
 `
+	certHostPEM = `-----BEGIN CERTIFICATE-----
+MIICEzCCAX6gAwIBAgIBAjALBgkqhkiG9w0BAQUwMTEMMAoGA1UEBhMDVVNBMRQw
+EgYDVQQKEwtDb3JlT1MgSW5jLjELMAkGA1UEAxMCQ0EwHhcNMTQwMzExMTkwOTMx
+WhcNMjQwMzExMTkwOTMxWjAwMQwwCgYDVQQGEwNVU0ExEDAOBgNVBAoTB2V0Y2Qt
+Y2ExDjAMBgNVBAMTBWhvc3QxMIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQCr
+YfUfmFfGtac16Ez9zwOBQggz70R/eOFnM3OAD9GFXaKzTOJJhZNa9iDLIT69zSeq
+74i4rOaIH2Yt9LycWUuGgo3XK2AfDevnUIr0Af5rq/tOmBK708Q2FCTOnwD44eyS
+DQVNwaIqj6dQV/cukrlCSR6o5t0nLp1QII/xPaBm+QIDAQABo0AwPjAdBgNVHSUE
+FjAUBggrBgEFBQcDAQYIKwYBBQUHAwIwHQYDVR0OBBYEFEk719DRqeTH5K6Tag0r
+ftDtdO4sMAsGCSqGSIb3DQEBBQOBgQBGNpubUIJClTFIOsZKbH/aikT3AIlNzK2t
+XhBUZKJf8P4+gHiI461FGskSuTTkUiPeSzsH0FdDjwhIuUCRsUKES10VVHb1jqIu
+S/nYTAI0ToSxKXBF2+M5umPOt65wjzcgnMj9QZgtm5AMJ9xmoZZMKBL9jAg7umiV
+SJG3FlQNIA==
+-----END CERTIFICATE-----`
 )
 
 func TestCertificateAuthority(t *testing.T) {
@@ -62,6 +76,14 @@ func TestCertificateAuthority(t *testing.T) {
 
 	if err = crt.VerifyHost(crt, authHostname); err != nil {
 		t.Fatal("Failed to verify CA:", err)
+	}
+
+	pemBytes, err := crt.Export()
+	if err != nil {
+		t.Fatal("Failed exporting PEM-format bytes:", err)
+	}
+	if bytes.Compare(pemBytes, []byte(certAuthPEM)) != 0 {
+		t.Fatal("Failed exporting the same PEM-format bytes")
 	}
 }
 
@@ -81,7 +103,7 @@ func TestBadCertificate(t *testing.T) {
 		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
 
-	if _, err = crt.GetRawCrt(); err == nil {
+	if _, err = crt.GetRawCertificate(); err == nil {
 		t.Fatal("Expect not to get x509.Certificate")
 	}
 
@@ -98,26 +120,22 @@ func TestBadCertificate(t *testing.T) {
 		t.Fatal("Failed exporting PEM-format bytes:", err)
 	}
 	if bytes.Compare(pemBytes, []byte(badCertAuthPEM)) != 0 {
-		t.Fatal(len(pemBytes), len(badCertAuthPEM))
 		t.Fatal("Failed exporting the same PEM-format bytes")
 	}
 }
 
-// TestCertificateExport tests the ability to convert DER bytes into PEM bytes
-func TestCertificateExport(t *testing.T) {
-	crt, err := NewCertificateFromPEM([]byte(certAuthPEM))
+func TestCertificateVerify(t *testing.T) {
+	crtAuth, err := NewCertificateFromPEM([]byte(certAuthPEM))
 	if err != nil {
 		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
 
-	// remove the copy of PEM in crt
-	crt.pemBlock = nil
-
-	pemBytes, err := crt.Export()
+	crtHost, err := NewCertificateFromPEM([]byte(certHostPEM))
 	if err != nil {
-		t.Fatal("Failed exporting PEM-format bytes:", err)
+		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
-	if bytes.Compare(pemBytes, []byte(certAuthPEM)) != 0 {
-		t.Fatal("Failed exporting the same PEM-format bytes")
+
+	if err = crtAuth.VerifyHost(crtHost, csrHostname); err != nil {
+		t.Fatal("Verify certificate host from CA:", err)
 	}
 }

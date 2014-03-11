@@ -16,8 +16,6 @@ type Certificate struct {
 	// derBytes is always set for valid Certificate
 	derBytes []byte
 
-	pemBlock *pem.Block
-
 	crt *x509.Certificate
 }
 
@@ -26,7 +24,7 @@ func NewCertificateFromDER(derBytes []byte) *Certificate {
 	return &Certificate{derBytes: derBytes}
 }
 
-// NewCertificateFromDER inits Certificate from PEM-format bytes
+// NewCertificateFromPEM inits Certificate from PEM-format bytes
 // data should contain at most one certificate
 func NewCertificateFromPEM(data []byte) (c *Certificate, err error) {
 	pemBlock, _ := pem.Decode(data)
@@ -38,7 +36,7 @@ func NewCertificateFromPEM(data []byte) (c *Certificate, err error) {
 		err = errors.New("unmatched type or headers")
 		return
 	}
-	c = &Certificate{derBytes: pemBlock.Bytes, pemBlock: pemBlock}
+	c = &Certificate{derBytes: pemBlock.Bytes}
 	return
 }
 
@@ -59,8 +57,8 @@ func (c *Certificate) buildX509Certificate() error {
 	return nil
 }
 
-// GetRawCrt gets crypto/x509-format Certificate
-func (c *Certificate) GetRawCrt() (*x509.Certificate, error) {
+// GetRawCertificate gets crypto/x509-format Certificate
+func (c *Certificate) GetRawCertificate() (*x509.Certificate, error) {
 	if err := c.buildX509Certificate(); err != nil {
 		return nil, err
 	}
@@ -102,7 +100,12 @@ func (c *Certificate) VerifyHost(hostCert *Certificate, name string) error {
 		KeyUsages: nil,
 	}
 
-	chains, err := hostCert.crt.Verify(verifyOpts)
+	rawHostCrt, err := hostCert.GetRawCertificate()
+	if err != nil {
+		return err
+	}
+
+	chains, err := rawHostCrt.Verify(verifyOpts)
 	if err != nil {
 		return err
 	}
@@ -113,24 +116,16 @@ func (c *Certificate) VerifyHost(hostCert *Certificate, name string) error {
 	return nil
 }
 
-func (c *Certificate) buildPEM() {
-	if c.pemBlock != nil {
-		return
-	}
-
-	c.pemBlock = &pem.Block{
+// Export returns PEM-format bytes
+func (c *Certificate) Export() ([]byte, error) {
+	pemBlock := &pem.Block{
 		Type:    certificatePEMBlockType,
 		Headers: nil,
 		Bytes:   c.derBytes,
 	}
-}
-
-// Export returns PEM-format bytes
-func (c *Certificate) Export() ([]byte, error) {
-	c.buildPEM()
 
 	buf := new(bytes.Buffer)
-	if err := pem.Encode(buf, c.pemBlock); err != nil {
+	if err := pem.Encode(buf, pemBlock); err != nil {
 		return nil, err
 	}
 	return buf.Bytes(), nil

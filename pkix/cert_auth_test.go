@@ -11,12 +11,11 @@ func TestCreateCertificateAuthority(t *testing.T) {
 		t.Fatal("Failed creating rsa key:", err)
 	}
 
-	crt, err := CreateCertificateAuthority(key)
+	crt, info, err := CreateCertificateAuthority(key)
 	if err != nil {
 		t.Fatal("Failed creating certificate authority:", err)
 	}
-
-	rawCrt, err := crt.GetRawCrt()
+	rawCrt, err := crt.GetRawCertificate()
 	if err != nil {
 		t.Fatal("Failed to get x509.Certificate:", err)
 	}
@@ -35,5 +34,9 @@ func TestCreateCertificateAuthority(t *testing.T) {
 
 	if !time.Now().Before(rawCrt.NotAfter) {
 		t.Fatal("Failed to be before NotAfter")
+	}
+
+	if info.SerialNumber.Uint64() != authStartSerialNumber {
+		t.Fatal("Failed to set serial number")
 	}
 }

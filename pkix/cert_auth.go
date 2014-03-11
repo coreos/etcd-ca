@@ -11,6 +11,8 @@ import (
 const (
 	// hostname used by CA certificate
 	authHostname = "CA"
+	// SerialNumber to start when signing certificate request
+	authStartSerialNumber = 2
 )
 
 var (
@@ -58,17 +60,19 @@ var (
 	}
 )
 
-func CreateCertificateAuthority(key *Key) (*Certificate, error) {
-	subjectKeyId, err := key.GenerateSubjectKeyId()
+// CreateCertificateAuthority creates Certificate Authority using existing key.
+// CertificateAuthorityInfo returned is the extra infomation required by Certificate Authority.
+func CreateCertificateAuthority(key *Key) (*Certificate, *CertificateAuthorityInfo, error) {
+	subjectKeyId, err := GenerateSubjectKeyId(key.Public)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	authTemplate.SubjectKeyId = subjectKeyId
 
-	crtBytes, err := x509.CreateCertificate(rand.Reader, &authTemplate, &authTemplate, key.pub, key.priv)
+	crtBytes, err := x509.CreateCertificate(rand.Reader, &authTemplate, &authTemplate, key.Public, key.Private)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return NewCertificateFromDER(crtBytes), nil
+	return NewCertificateFromDER(crtBytes), NewCertificateAuthorityInfo(authStartSerialNumber), nil
 }

@@ -56,13 +56,24 @@ IEzY0Lcuq3pwJlQyyaNQxXF4orPp5Rzi5pNabuGJ8Q==
 	subjectKeyIdOfRSAPubKeyAuthBASE64 = "wqt53Slv45QgmFh7AiIj+dx1NOw="
 )
 
+func TestCreateRSAKey(t *testing.T) {
+	key, err := CreateRSAKey()
+	if err != nil {
+		t.Fatal("Failed creating rsa key:", err)
+	}
+
+	if err = key.Private.(*rsa.PrivateKey).Validate(); err != nil {
+		t.Fatal("Failed to validate private key")
+	}
+}
+
 func TestRSAKey(t *testing.T) {
 	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed parsing RSA private key:", err)
 	}
 
-	if err = key.priv.(*rsa.PrivateKey).Validate(); err != nil {
+	if err = key.Private.(*rsa.PrivateKey).Validate(); err != nil {
 		t.Fatal("Failed validating RSA private key:", err)
 	}
 }
@@ -93,9 +104,6 @@ func TestRSAKeyExport(t *testing.T) {
 		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
 
-	// remove the copy of PEM
-	key.privPEMBlock = nil
-
 	pemBytes, err := key.ExportPrivate()
 	if err != nil {
 		t.Fatal("Failed exporting PEM-format bytes:", err)
@@ -105,24 +113,13 @@ func TestRSAKeyExport(t *testing.T) {
 	}
 }
 
-func TestCreateRSAKey(t *testing.T) {
-	key, err := CreateRSAKey()
-	if err != nil {
-		t.Fatal("Failed creating rsa key:", err)
-	}
-
-	if err = key.priv.(*rsa.PrivateKey).Validate(); err != nil {
-		t.Fatal("Failed to validate private key")
-	}
-}
-
 func TestRSAKeyGenerateSubjectKeyId(t *testing.T) {
 	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed parsing RSA private key:", err)
 	}
 
-	id, err := key.GenerateSubjectKeyId()
+	id, err := GenerateSubjectKeyId(key.Public)
 	if err != nil {
 		t.Fatal("Failed generating SubjectKeyId:", err)
 	}
