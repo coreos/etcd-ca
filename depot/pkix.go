@@ -204,8 +204,8 @@ func DeletePrivateKeyHost(d Depot, name string) error {
 	return d.Delete(HostPrivKeyTag(name))
 }
 
-func PutEncryptedPrivateKeyAuthority(d Depot, key *pkix.Key, password []byte) error {
-	b, err := key.ExportEncryptedPrivate(password)
+func PutEncryptedPrivateKeyAuthority(d Depot, key *pkix.Key, passphrase []byte) error {
+	b, err := key.ExportEncryptedPrivate(passphrase)
 	if err != nil {
 		return err
 	}
@@ -216,20 +216,20 @@ func CheckEncryptedPrivateKeyAuthority(d Depot) bool {
 	return d.Check(AuthPrivKeyTag())
 }
 
-func GetEncryptedPrivateKeyAuthority(d Depot, password []byte) (key *pkix.Key, err error) {
+func GetEncryptedPrivateKeyAuthority(d Depot, passphrase []byte) (key *pkix.Key, err error) {
 	b, err := d.Get(AuthPrivKeyTag())
 	if err != nil {
 		return nil, err
 	}
-	return pkix.NewKeyFromEncryptedPrivateKeyPEM(b, password)
+	return pkix.NewKeyFromEncryptedPrivateKeyPEM(b, passphrase)
 }
 
 func DeleteEncryptedPrivateKeyAuthority(d Depot) error {
 	return d.Delete(AuthPrivKeyTag())
 }
 
-func PutEncryptedPrivateKeyHost(d Depot, name string, key *pkix.Key, password []byte) error {
-	b, err := key.ExportEncryptedPrivate(password)
+func PutEncryptedPrivateKeyHost(d Depot, name string, key *pkix.Key, passphrase []byte) error {
+	b, err := key.ExportEncryptedPrivate(passphrase)
 	if err != nil {
 		return err
 	}
@@ -240,12 +240,12 @@ func CheckEncryptedPrivateKeyHost(d Depot, name string) bool {
 	return d.Check(HostPrivKeyTag(name))
 }
 
-func GetEncryptedPrivateKeyHost(d Depot, name string, password []byte) (key *pkix.Key, err error) {
+func GetEncryptedPrivateKeyHost(d Depot, name string, passphrase []byte) (key *pkix.Key, err error) {
 	b, err := d.Get(HostPrivKeyTag(name))
 	if err != nil {
 		return nil, err
 	}
-	return pkix.NewKeyFromEncryptedPrivateKeyPEM(b, password)
+	return pkix.NewKeyFromEncryptedPrivateKeyPEM(b, passphrase)
 }
 
 func DeleteEncryptedPrivateKeyHost(d Depot, name string) error {

@@ -15,10 +15,10 @@ func NewInitCommand() cli.Command {
 		Name:        "init",
 		Usage:       "Create Certificate Authority",
 		Description: "Create Certificate Authority, including certificate, key and extra information file.",
-		Flags:       []cli.Flag{
+		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block"},
 		},
-		Action:      initAction,
+		Action: initAction,
 	}
 }
 

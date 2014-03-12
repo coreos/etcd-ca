@@ -15,10 +15,10 @@ func NewSignCommand() cli.Command {
 		Name:        "sign",
 		Usage:       "Sign certificate request",
 		Description: "Sign certificate request with CA, and generate certificate for the host.",
-		Flags:       []cli.Flag{
+		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block of CA"},
 		},
-		Action:      newSignAction,
+		Action: newSignAction,
 	}
 }
 
@@ -32,13 +32,6 @@ func newSignAction(c *cli.Context) {
 	if depot.CheckCertificateHost(d, name) {
 		fmt.Fprintln(os.Stderr, "Certificate has existed!")
 		os.Exit(1)
-	}
-
-	var passphrase []byte
-	if c.IsSet("passphrase") {
-		passphrase = []byte(c.String("passphrase"))
-	} else {
-		passphrase = askPassPhrase("CA key")
 	}
 
 	csr, err := depot.GetCertificateSigningRequest(d, name)
@@ -56,7 +49,7 @@ func newSignAction(c *cli.Context) {
 		fmt.Fprintln(os.Stderr, "Got CA certificate info error:", err)
 		os.Exit(1)
 	}
-	key, err := depot.GetEncryptedPrivateKeyAuthority(d, passphrase)
+	key, err := depot.GetEncryptedPrivateKeyAuthority(d, getPassPhrase(c, "CA key"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Got CA key error:", err)
 		os.Exit(1)

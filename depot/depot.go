@@ -89,9 +89,21 @@ func (d *FileDepot) Check(tag *Tag) bool {
 	return false
 }
 
+func (d *FileDepot) check(tag *Tag) error {
+	name := d.path(tag.name)
+	fi, err := os.Stat(name)
+	if err != nil {
+		return err
+	}
+	if ^fi.Mode()&tag.perm != 0 {
+		return errors.New("permission denied")
+	}
+	return nil
+}
+
 func (d *FileDepot) Get(tag *Tag) ([]byte, error) {
-	if !d.Check(tag) {
-		return nil, errors.New("permission denied")
+	if err := d.check(tag); err != nil {
+		return nil, err
 	}
 	return ioutil.ReadFile(d.path(tag.name))
 }
@@ -124,14 +136,19 @@ func (d *FileDepot) List() []*Tag {
 	return tags
 }
 
-func (d *FileDepot) GetFile(tag *Tag) (os.FileInfo, []byte, error) {
-	if !d.Check(tag) {
-		return nil, nil, errors.New("permission denied")
+type File struct {
+	Info os.FileInfo
+	Data []byte
+}
+
+func (d *FileDepot) GetFile(tag *Tag) (*File, error) {
+	if err := d.check(tag); err != nil {
+		return nil, err
 	}
 	fi, err := os.Stat(d.path(tag.name))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	b, err := ioutil.ReadFile(d.path(tag.name))
-	return fi, b, err
+	return &File{fi, b}, err
 }

@@ -66,8 +66,8 @@ func TestWorkflow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
 	}
-	keyFile := fmt.Sprintf("%v.host.priv.key", hostname)
-	crtFile := fmt.Sprintf("%v.host.crt", hostname)
+	keyFile := fmt.Sprintf("%v.key", hostname)
+	crtFile := fmt.Sprintf("%v.crt", hostname)
 	defer os.Remove(keyFile)
 	defer os.Remove(crtFile)
 	if _, err = os.Stat(keyFile); err != nil {

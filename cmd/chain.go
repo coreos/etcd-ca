@@ -13,7 +13,7 @@ func NewChainCommand() cli.Command {
 	return cli.Command{
 		Name:        "chain",
 		Usage:       "Export certificate chain",
-		Description: "Export the certificate chain for host1. With no args it exports this CA's certificate.",
+		Description: "Export the certificate chain for host. With no args it exports this CA's certificate.",
 		Action:      newChainAction,
 	}
 }
