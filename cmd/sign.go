@@ -73,4 +73,7 @@ func newSignAction(c *cli.Context) {
 	if err = depot.PutCertificateHost(d, name, crtHost); err != nil {
 		fmt.Fprintln(os.Stderr, "Saved certificate error:", err)
 	}
+	if err = depot.UpdateCertificateAuthorityInfo(d, info); err != nil {
+		fmt.Fprintln(os.Stderr, "Update CA info error:", err)
+	}
 }
