@@ -39,7 +39,7 @@ func NewKey(pub crypto.PublicKey, priv crypto.PrivateKey) *Key {
 	return &Key{Public: pub, Private: priv}
 }
 
-// NewKeyFromRSAPrivateKeyPEM inits Key from PEM-format rsa private key bytes
+// NewKeyFromPrivateKeyPEM inits Key from PEM-format rsa private key bytes
 func NewKeyFromPrivateKeyPEM(data []byte) (*Key, error) {
 	pemBlock, _ := pem.Decode(data)
 	if pemBlock == nil {
@@ -50,6 +50,29 @@ func NewKeyFromPrivateKeyPEM(data []byte) (*Key, error) {
 	}
 
 	priv, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewKey(&priv.PublicKey, priv), nil
+}
+
+// NewKeyFromEncryptedPrivateKeyPEM inits Key from encrypted PEM-format rsa private key bytes
+func NewKeyFromEncryptedPrivateKeyPEM(data []byte, password []byte) (*Key, error) {
+	pemBlock, _ := pem.Decode(data)
+	if pemBlock == nil {
+		return nil, errors.New("cannot find the next PEM formatted block")
+	}
+	if pemBlock.Type != rsaPrivateKeyPEMBlockType {
+		return nil, errors.New("unmatched type or headers")
+	}
+
+	b, err := x509.DecryptPEMBlock(pemBlock, password)
+	if err != nil {
+		return nil, err
+	}
+
+	priv, err := x509.ParsePKCS1PrivateKey(b)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +92,28 @@ func (k *Key) ExportPrivate() ([]byte, error) {
 		}
 	default:
 		return nil, errors.New("only RSA private key is supported")
+	}
+
+	buf := new(bytes.Buffer)
+	if err := pem.Encode(buf, privPEMBlock); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+// ExportEncryptedPrivate exports encrypted PEM-format private key
+func (k *Key) ExportEncryptedPrivate(password []byte) ([]byte, error) {
+	var privBytes []byte
+	switch priv := k.Private.(type) {
+	case *rsa.PrivateKey:
+		privBytes = x509.MarshalPKCS1PrivateKey(priv)
+	default:
+		return nil, errors.New("only RSA private key is supported")
+	}
+
+	privPEMBlock, err := x509.EncryptPEMBlock(rand.Reader, rsaPrivateKeyPEMBlockType, privBytes, password, x509.PEMCipher3DES)
+	if err != nil {
+		return nil, err
 	}
 
 	buf := new(bytes.Buffer)

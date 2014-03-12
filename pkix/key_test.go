@@ -53,6 +53,28 @@ IEzY0Lcuq3pwJlQyyaNQxXF4orPp5Rzi5pNabuGJ8Q==
 -----END RSA PRIVATE KEY-----
 `
 
+	rsaEncryptedPrivKeyAuthPEM = `-----BEGIN RSA PRIVATE KEY-----
+Proc-Type: 4,ENCRYPTED
+DEK-Info: DES-EDE3-CBC,2ef29f8702fc501a
+
+VP9jGydG3iPHjGutyZC+4g5wx0wQ847YcdyyXUfwuC3XJoQ1IeAhPlNhgYuaTBU2
+5yonpHwEo4f2QrRY+0bVwQylQxQvqQsOp8uvyXoD2jQE9fwfkJrFmiBYGL0zu9NT
+mSQETzqyFkF7IlUy0AQbks+dXrPNJ4BhaDE/BQ4L3Hc6N72EoOPjWf+Pp1SsGED5
+IOzvnFTEhJR9JTH1E4vuac4MsY9eXvlKNGy5r06U4TSS7hkcetFzIcpXNl2TQk+k
+9hh9LSkHUG5ruLP8v+8GpdOtmgJ4BZ0FUhmkGfhVBGZik4iMBDPvy7pZ2fVldtAL
+8n09uLQZ0DL8GrNJNudWEGvZCMYVhseaQkIQu9540oHG3IxPzqR4whNx4ABB6oKQ
+t1Sl4NRB9T+zUbjjdigYhEiDGbB/b0yfu6HsNouLEGXvXy7yORfJLkIIfjngIMtM
+7FUylgsRL1U1swDvJOKmFEHaMbUfKQ0s14zCFk/Wx7mXxgWWRNxI33Y0ttxya18n
+fm6Q0/q3ZHqczaDhsY7Kk5RpYX9aIP2LDjLisN9J4MEVawJ+jiwdHqCHozb63fTx
+rvRPORfRDOFxx33eTh0D4f21y/AgOxuENOiQaUNoq9VMg9rzI14i9/wwIk2DlkxF
+SH2sSBFOBRXWsJQFgme+278hubaQAVf0vrUSAeiB2ZA9ACb0c8mOYygeTZ2Mjnq4
+A3J1riefAkQ1RZ97LHvzYxyBFklUr7+NeZztv3N6cuOZ1JEka2AKE6SOo9xMqWt9
+2TR5s0BqeOjU45XGuiXOAipLc1pAkoKqtE/7IKRr/IY=
+-----END RSA PRIVATE KEY-----
+`
+	password      = "123456"
+	wrongPassword = "654321"
+
 	subjectKeyIdOfRSAPubKeyAuthBASE64 = "wqt53Slv45QgmFh7AiIj+dx1NOw="
 )
 
@@ -110,6 +132,31 @@ func TestRSAKeyExport(t *testing.T) {
 	}
 	if bytes.Compare(pemBytes, []byte(rsaPrivKeyAuthPEM)) != 0 {
 		t.Fatal("Failed exporting the same PEM-format bytes")
+	}
+}
+
+// TestRSAKeyExportEncrypted tests the ability to convert rsa key into encrypted PEM bytes
+func TestRSAKeyExportEncrypted(t *testing.T) {
+	key, err := NewKeyFromEncryptedPrivateKeyPEM([]byte(rsaEncryptedPrivKeyAuthPEM), []byte(password))
+	if err != nil {
+		t.Fatal("Failed to parse certificate from PEM:", err)
+	}
+
+	pemBytes, err := key.ExportPrivate()
+	if err != nil {
+		t.Fatal("Failed exporting PEM-format bytes:", err)
+	}
+	if bytes.Compare(pemBytes, []byte(rsaPrivKeyAuthPEM)) != 0 {
+		t.Fatal("Failed exporting the same PEM-format bytes")
+	}
+
+	pemBytes, err = key.ExportEncryptedPrivate([]byte(password))
+	if err != nil {
+		t.Fatal("Failed exporting PEM-format bytes:", err)
+	}
+
+	if _, err := NewKeyFromEncryptedPrivateKeyPEM(pemBytes, []byte(wrongPassword)); err == nil {
+		t.Fatal("Expect not parsing certificate from PEM:", err)
 	}
 }
 
