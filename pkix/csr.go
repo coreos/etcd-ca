@@ -28,8 +28,9 @@ var (
 	}
 )
 
-func CreateCertificateSigningRequest(key *Key, name string) (*CertificateSigningRequest, error) {
-	csrPkixName.CommonName = name
+func CreateCertificateSigningRequest(key *Key, name string, ip string) (*CertificateSigningRequest, error) {
+	csrPkixName.OrganizationalUnit = []string{name}
+	csrPkixName.CommonName = ip
 	csrTemplate := &pkcs10.CertificateSigningRequest{Subject: csrPkixName}
 
 	csrBytes, err := pkcs10.CreateCertificateSigningRequest(rand.Reader, csrTemplate, key.Private)
