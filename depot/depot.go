@@ -7,6 +7,10 @@ import (
 	"path/filepath"
 )
 
+const (
+	DefaultFileDepotDir = ".etcd-ca"
+)
+
 // Tag includes name and permission requirement
 // Permission requirement is used in two ways:
 // 1. Set the permission for data when Put
@@ -24,11 +28,10 @@ type Tag struct {
 // Depot is in charge of data storage
 type Depot interface {
 	Put(tag *Tag, data []byte) error
+	Check(tag *Tag) bool
 	Get(tag *Tag) ([]byte, error)
 	Delete(tag *Tag) error
-	Check(tag *Tag) bool
 }
-
 
 // FileDepot is a implementation of Depot using file system
 type FileDepot struct {
@@ -36,7 +39,7 @@ type FileDepot struct {
 	dirPath string
 }
 
-func New(dir string) (*FileDepot, error) {
+func NewFileDepot(dir string) (*FileDepot, error) {
 	dirpath, err := filepath.Abs(dir)
 	if err != nil {
 		return nil, err
@@ -80,7 +83,7 @@ func (d *FileDepot) Put(tag *Tag, data []byte) error {
 
 func (d *FileDepot) Check(tag *Tag) bool {
 	name := d.path(tag.name)
-	if fi, err := os.Stat(name); err == nil && ^fi.Mode() & tag.perm == 0 {
+	if fi, err := os.Stat(name); err == nil && ^fi.Mode()&tag.perm == 0 {
 		return true
 	}
 	return false
@@ -95,4 +98,40 @@ func (d *FileDepot) Get(tag *Tag) ([]byte, error) {
 
 func (d *FileDepot) Delete(tag *Tag) error {
 	return os.Remove(d.path(tag.name))
+}
+
+func (d *FileDepot) List() []*Tag {
+	tags := make([]*Tag, 0)
+
+	filepath.Walk(d.dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return nil
+		}
+		if info.IsDir() {
+			return nil
+		}
+		rel, err := filepath.Rel(d.dirPath, path)
+		if err != nil {
+			return nil
+		}
+		if rel != info.Name() {
+			return nil
+		}
+		tags = append(tags, &Tag{info.Name(), info.Mode()})
+		return nil
+	})
+
+	return tags
+}
+
+func (d *FileDepot) GetFile(tag *Tag) (os.FileInfo, []byte, error) {
+	if !d.Check(tag) {
+		return nil, nil, errors.New("permission denied")
+	}
+	fi, err := os.Stat(d.path(tag.name))
+	if err != nil {
+		return nil, nil, err
+	}
+	b, err := ioutil.ReadFile(d.path(tag.name))
+	return fi, b, err
 }

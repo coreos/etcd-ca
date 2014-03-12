@@ -40,7 +40,7 @@ func NewKey(pub crypto.PublicKey, priv crypto.PrivateKey) *Key {
 }
 
 // NewKeyFromRSAPrivateKeyPEM inits Key from PEM-format rsa private key bytes
-func NewKeyFromRSAPrivateKeyPEM(data []byte) (*Key, error) {
+func NewKeyFromPrivateKeyPEM(data []byte) (*Key, error) {
 	pemBlock, _ := pem.Decode(data)
 	if pemBlock == nil {
 		return nil, errors.New("cannot find the next PEM formatted block")

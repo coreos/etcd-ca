@@ -8,19 +8,20 @@ import (
 
 const (
 	data = "It is a trap only!"
-	dir = ".etcd-ca"
+	dir  = ".etcd-ca-test"
 )
 
 var (
-	tag = &Tag{"host.pem", 0600}
-	wrongTag = &Tag{"host.pem", 0666}
+	tag       = &Tag{"host.pem", 0600}
+	tag2      = &Tag{"host2.pem", 0600}
+	wrongTag  = &Tag{"host.pem", 0666}
 	wrongTag2 = &Tag{"host.pem2", 0600}
 )
 
-func getDepot(t *testing.T) Depot {
+func getDepot(t *testing.T) *FileDepot {
 	os.RemoveAll(dir)
 
-	d, err := New(dir)
+	d, err := NewFileDepot(dir)
 	if err != nil {
 		t.Fatal("Failed init Depot:", err)
 	}
@@ -30,6 +31,7 @@ func getDepot(t *testing.T) Depot {
 // TestDepotCRUD tests to create, update and delete data
 func TestDepotCRUD(t *testing.T) {
 	d := getDepot(t)
+	defer os.RemoveAll(dir)
 
 	if err := d.Put(tag, []byte(data)); err != nil {
 		t.Fatal("Failed putting file into Depot:", err)
@@ -56,6 +58,7 @@ func TestDepotCRUD(t *testing.T) {
 
 func TestDepotPutNil(t *testing.T) {
 	d := getDepot(t)
+	defer os.RemoveAll(dir)
 
 	if err := d.Put(tag, nil); err == nil {
 		t.Fatal("Expect not to put nil into Depot:", err)
@@ -70,6 +73,7 @@ func TestDepotPutNil(t *testing.T) {
 
 func TestDepotCheckFailure(t *testing.T) {
 	d := getDepot(t)
+	defer os.RemoveAll(dir)
 
 	if err := d.Put(tag, []byte(data)); err != nil {
 		t.Fatal("Failed putting file into Depot:", err)
@@ -88,6 +92,7 @@ func TestDepotCheckFailure(t *testing.T) {
 
 func TestDepotGetFailure(t *testing.T) {
 	d := getDepot(t)
+	defer os.RemoveAll(dir)
 
 	if err := d.Put(tag, []byte(data)); err != nil {
 		t.Fatal("Failed putting file into Depot:", err)
@@ -102,4 +107,45 @@ func TestDepotGetFailure(t *testing.T) {
 	}
 
 	d.Delete(tag)
+}
+
+func TestDepotList(t *testing.T) {
+	d := getDepot(t)
+	defer os.RemoveAll(dir)
+
+	if err := d.Put(tag, []byte(data)); err != nil {
+		t.Fatal("Failed putting file into Depot:", err)
+	}
+	if err := d.Put(tag2, []byte(data)); err != nil {
+		t.Fatal("Failed putting file into Depot:", err)
+	}
+
+	tags := d.List()
+	if len(tags) != 2 {
+		t.Fatal("Expect to list 2 instead of", len(tags))
+	}
+	if tags[0].name != tag.name || tags[1].name != tag2.name {
+		t.Fatal("Failed getting file tags back")
+	}
+}
+
+func TestDepotGetFile(t *testing.T) {
+	d := getDepot(t)
+	defer os.RemoveAll(dir)
+
+	if err := d.Put(tag, []byte(data)); err != nil {
+		t.Fatal("Failed putting file into Depot:", err)
+	}
+
+	fi, dataRead, err := d.GetFile(tag)
+	if err != nil {
+		t.Fatal("Failed getting file from Depot:", err)
+	}
+	if bytes.Compare(dataRead, []byte(data)) != 0 {
+		t.Fatal("Failed getting the previous data")
+	}
+
+	if fi.Mode() != tag.perm {
+		t.Fatal("Failed setting permission")
+	}
 }

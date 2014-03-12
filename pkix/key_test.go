@@ -68,7 +68,7 @@ func TestCreateRSAKey(t *testing.T) {
 }
 
 func TestRSAKey(t *testing.T) {
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed parsing RSA private key:", err)
 	}
@@ -79,19 +79,19 @@ func TestRSAKey(t *testing.T) {
 }
 
 func TestWrongRSAKey(t *testing.T) {
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(".."))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(".."))
 	if key != nil || err == nil {
 		t.Fatal("Expect not to parse RSA private key:", err)
 	}
 
-	key, err = NewKeyFromRSAPrivateKeyPEM([]byte(wrongRSAPrivKeyAuthPEM))
+	key, err = NewKeyFromPrivateKeyPEM([]byte(wrongRSAPrivKeyAuthPEM))
 	if key != nil || err == nil {
 		t.Fatal("Expect not to parse RSA private key:", err)
 	}
 }
 
 func TestBadRSAKey(t *testing.T) {
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(badRSAPrivKeyAuthPEM))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(badRSAPrivKeyAuthPEM))
 	if key != nil || err == nil {
 		t.Fatal("Expect not to parse bad RSA private key:", err)
 	}
@@ -99,7 +99,7 @@ func TestBadRSAKey(t *testing.T) {
 
 // TestRSAKeyExport tests the ability to convert rsa key into PEM bytes
 func TestRSAKeyExport(t *testing.T) {
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
@@ -114,7 +114,7 @@ func TestRSAKeyExport(t *testing.T) {
 }
 
 func TestRSAKeyGenerateSubjectKeyId(t *testing.T) {
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed parsing RSA private key:", err)
 	}

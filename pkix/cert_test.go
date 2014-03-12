@@ -3,6 +3,7 @@ package pkix
 import (
 	"bytes"
 	"testing"
+	"time"
 )
 
 const (
@@ -78,6 +79,12 @@ func TestCertificateAuthority(t *testing.T) {
 		t.Fatal("Failed to verify CA:", err)
 	}
 
+	duration := crt.GetExpirationDuration()
+	expireDate, _ := time.Parse("2006-Jan-02", "2024-Feb-03")
+	if !time.Now().Add(duration).After(expireDate) {
+		t.Fatal("Failed to get correct expiration")
+	}
+
 	pemBytes, err := crt.Export()
 	if err != nil {
 		t.Fatal("Failed exporting PEM-format bytes:", err)
@@ -113,6 +120,10 @@ func TestBadCertificate(t *testing.T) {
 
 	if err = crt.VerifyHost(crt, authHostname); err == nil {
 		t.Fatal("Expect not to get x509.Certificate")
+	}
+
+	if duration := crt.GetExpirationDuration(); duration.Hours() >= 0 {
+		t.Fatal("Expect not to get positive duration")
 	}
 
 	pemBytes, err := crt.Export()
