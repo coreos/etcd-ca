@@ -4,38 +4,36 @@
 
 ### Depot
 
-The Depot is the storage manager. All certifications and keys are stored in the Depot: CA, host, CSR, etc.
+The Depot is the storage manager. All files are stored in the Depot: certificates, keys, certificate requests and etc.
 
 **NOTE:**The backing store is the file system. Users could fetch all certifications and keys without the help of the program.
 
 **NOTE:**File system permissions are used to secure certifications and keys. Data is categorized into different security level, and each level has its own specific permission.
 
-### CertAuthority
+### Cmd
 
-The CertAuthority is Certification Authority (CA).
+The cmd package is to handle commands according to its meaning.
 
-It generates new key and certification for CA is no one exists.
+## Object Model
 
-It signs CSRs.
+### Certificate
 
-### HostCertManager
+The Certificate represents certificate issued.
 
-The HostCertManager is responsible for managing host certification.
+It could be CA certificate, or certificate for host.
 
-It creates new certification for certain host.
+### Key
 
-It takes the signed CSRs into management.
+The Key represents key generated, which consists of private key and public key.
 
-### PermMonitor
+It is used to sign and verify certificates.
 
-The PermMonitor acts as monitor of all permission stuffs.
+### Certificate signing request
 
-It checks the permission of user to operate on moving parts.
+The Certificate signing request is the request that sends to CA for signing to generate certificate for host.
 
-It gives out the file permission for generated files.
+### Certificate Authority Info
 
-## Common Parts
+The Certificate Authority Info is the extra information needed for CA.
 
-### CLI
-
-CLI is command line interface.
+Serial number, the only member of Info, represents number that has been used for signing so far. It is recorded to ensure that serial number issued for each certificate is unique.
