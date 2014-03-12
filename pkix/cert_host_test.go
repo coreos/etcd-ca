@@ -10,7 +10,7 @@ func TestCreateCertificateHost(t *testing.T) {
 		t.Fatal("Failed to parse certificate from PEM:", err)
 	}
 
-	key, err := NewKeyFromRSAPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
+	key, err := NewKeyFromPrivateKeyPEM([]byte(rsaPrivKeyAuthPEM))
 	if err != nil {
 		t.Fatal("Failed parsing RSA private key:", err)
 	}
