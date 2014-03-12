@@ -57,7 +57,7 @@ func newExportAction(c *cli.Context) {
 	w := tar.NewWriter(os.Stdout)
 	defer w.Close()
 	if err = outputTarFiles(w, files); err != nil {
-		fmt.Fprintln(os.Stderr, "Saved tar error:", err)
+		fmt.Fprintln(os.Stderr, "Save tar error:", err)
 		os.Exit(1)
 	}
 }
@@ -68,25 +68,25 @@ func getAuthFiles(c *cli.Context) ([]*TarFile, error) {
 
 	crtFile, err := d.GetFile(depot.AuthCrtTag())
 	if err != nil {
-		return nil, errors.New("Got CA certificate error: " + err.Error())
+		return nil, errors.New("Get CA certificate error: " + err.Error())
 	}
 	crtTarFile, err := generateTarFile(crtFile, name+crtSuffix)
 	if err != nil {
-		return nil, errors.New("Generated certificate tar file error: " + err.Error())
+		return nil, errors.New("Generate certificate tar file error: " + err.Error())
 	}
 	tarFiles = append(tarFiles, crtTarFile)
 
 	keyFile, err := d.GetFile(depot.AuthPrivKeyTag())
 	if err != nil {
-		return nil, errors.New("Got CA key error: " + err.Error())
+		return nil, errors.New("Get CA key error: " + err.Error())
 	}
 	keyTarFile, err := generateTarFile(keyFile, name+keySuffix)
 	if err != nil {
-		return nil, errors.New("Generated key tar file error: " + err.Error())
+		return nil, errors.New("Generate key tar file error: " + err.Error())
 	}
 	if c.Bool("insecure") {
 		if keyTarFile, err = decryptEncryptedKeyTarFile(keyTarFile, getPassPhrase(c, name+" key")); err != nil {
-			return nil, errors.New("Decrypt CA key error: " + err.Error())
+			return nil, errors.New("Get decrypted CA key error: " + err.Error())
 		}
 	}
 	tarFiles = append(tarFiles, keyTarFile)
@@ -99,25 +99,25 @@ func getHostFiles(c *cli.Context, name string) ([]*TarFile, error) {
 
 	crtFile, err := d.GetFile(depot.HostCrtTag(name))
 	if err != nil {
-		return nil, errors.New("Got host certificate error: " + err.Error())
+		return nil, errors.New("Get host certificate error: " + err.Error())
 	}
 	crtTarFile, err := generateTarFile(crtFile, name+crtSuffix)
 	if err != nil {
-		return nil, errors.New("Generated certificate tar file error: " + err.Error())
+		return nil, errors.New("Generate certificate tar file error: " + err.Error())
 	}
 	tarFiles = append(tarFiles, crtTarFile)
 
 	keyFile, err := d.GetFile(depot.HostPrivKeyTag(name))
 	if err != nil {
-		return nil, errors.New("Got host key error: " + err.Error())
+		return nil, errors.New("Get host key error: " + err.Error())
 	}
 	keyTarFile, err := generateTarFile(keyFile, name+keySuffix)
 	if err != nil {
-		return nil, errors.New("Generated key tar file error: " + err.Error())
+		return nil, errors.New("Generate key tar file error: " + err.Error())
 	}
 	if c.Bool("insecure") {
 		if keyTarFile, err = decryptEncryptedKeyTarFile(keyTarFile, getPassPhrase(c, name+" key")); err != nil {
-			return nil, errors.New("Decrypt host key error: " + err.Error())
+			return nil, errors.New("Get decrypted host key error: " + err.Error())
 		}
 	}
 	tarFiles = append(tarFiles, keyTarFile)

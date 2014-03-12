@@ -42,7 +42,7 @@ func initAction(c *cli.Context) {
 
 	key, err := pkix.CreateRSAKey()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Created RSA Key error:", err)
+		fmt.Fprintln(os.Stderr, "Create RSA Key error:", err)
 		os.Exit(1)
 	} else {
 		fmt.Println("Created ca/key")
@@ -50,19 +50,19 @@ func initAction(c *cli.Context) {
 
 	crt, info, err := pkix.CreateCertificateAuthority(key)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Created certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Create certificate error:", err)
 		os.Exit(1)
 	} else {
 		fmt.Println("Created ca/crt")
 	}
 
 	if err = depot.PutCertificateAuthority(d, crt); err != nil {
-		fmt.Fprintln(os.Stderr, "Saved certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Save certificate error:", err)
 	}
 	if err = depot.PutCertificateAuthorityInfo(d, info); err != nil {
-		fmt.Fprintln(os.Stderr, "Saved certificate info error:", err)
+		fmt.Fprintln(os.Stderr, "Save certificate info error:", err)
 	}
 	if err = depot.PutEncryptedPrivateKeyAuthority(d, key, passphrase); err != nil {
-		fmt.Fprintln(os.Stderr, "Saved key error:", err)
+		fmt.Fprintln(os.Stderr, "Save key error:", err)
 	}
 }
