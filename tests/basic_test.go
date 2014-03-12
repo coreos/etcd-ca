@@ -11,12 +11,24 @@ const (
 	binPath  = "../bin/etcd-ca"
 	depotDir = ".etcd-ca-test"
 	hostname = "host1"
+	password = "123456"
 )
 
 func run(command string, args ...string) (string, string, error) {
 	var stdoutBytes, stderrBytes bytes.Buffer
 	args = append([]string{"--depot-path", depotDir}, args...)
 	cmd := exec.Command(command, args...)
+	cmd.Stdout = &stdoutBytes
+	cmd.Stderr = &stderrBytes
+	err := cmd.Run()
+	return stdoutBytes.String(), stderrBytes.String(), err
+}
+
+func runWithStdin(stdinBytes []byte, command string, args ...string) (string, string, error) {
+	var stdoutBytes, stderrBytes bytes.Buffer
+	args = append([]string{"--depot-path", depotDir}, args...)
+	cmd := exec.Command(command, args...)
+	cmd.Stdin = bytes.NewBuffer(stdinBytes)
 	cmd.Stdout = &stdoutBytes
 	cmd.Stderr = &stderrBytes
 	err := cmd.Run()

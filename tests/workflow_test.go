@@ -15,7 +15,7 @@ func TestWorkflow(t *testing.T) {
 	os.RemoveAll(depotDir)
 	defer os.RemoveAll(depotDir)
 
-	stdout, stderr, err := run(binPath, "init")
+	stdout, stderr, err := runWithStdin([]byte(fmt.Sprintf("%v\n%v\n", password, password)), binPath, "init")
 	if stderr != "" || err != nil {
 		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
 	}
@@ -23,7 +23,7 @@ func TestWorkflow(t *testing.T) {
 		t.Fatalf("Received insufficient create: %v", stdout)
 	}
 
-	stdout, stderr, err = run(binPath, "new-cert", hostname)
+	stdout, stderr, err = runWithStdin([]byte(fmt.Sprintf("%v\n%v\n", password, password)), binPath, "new-cert", hostname)
 	if stderr != "" || err != nil {
 		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
 	}
@@ -31,7 +31,7 @@ func TestWorkflow(t *testing.T) {
 		t.Fatalf("Received insufficient create: %v", stdout)
 	}
 
-	stdout, stderr, err = run(binPath, "sign", hostname)
+	stdout, stderr, err = runWithStdin([]byte(fmt.Sprintf("%v\n", password)), binPath, "sign", hostname)
 	if stderr != "" || err != nil {
 		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
 	}
@@ -84,5 +84,4 @@ func TestWorkflow(t *testing.T) {
 	if strings.Count(stdout, "expiration") != 2 {
 		t.Fatalf("Received insufficient expiration: %v", stdout)
 	}
-
 }

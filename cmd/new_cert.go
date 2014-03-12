@@ -31,6 +31,12 @@ func newCertAction(c *cli.Context) {
 		os.Exit(1)
 	}
 
+	password, err := createPassPhrase()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
 	key, err := pkix.CreateRSAKey()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Created RSA Key error:", err)
@@ -50,7 +56,7 @@ func newCertAction(c *cli.Context) {
 	if err = depot.PutCertificateSigningRequest(d, name, csr); err != nil {
 		fmt.Fprintln(os.Stderr, "Saved certificate request error:", err)
 	}
-	if err = depot.PutPrivateKeyHost(d, name, key); err != nil {
+	if err = depot.PutEncryptedPrivateKeyHost(d, name, key, password); err != nil {
 		fmt.Fprintln(os.Stderr, "Saved key error:", err)
 	}
 }

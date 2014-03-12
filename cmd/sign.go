@@ -46,7 +46,7 @@ func newSignAction(c *cli.Context) {
 		fmt.Fprintln(os.Stderr, "Got CA certificate info error:", err)
 		os.Exit(1)
 	}
-	key, err := depot.GetPrivateKeyAuthority(d)
+	key, err := depot.GetEncryptedPrivateKeyAuthority(d, askPassPhrase("CA key"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Got CA key error:", err)
 		os.Exit(1)
