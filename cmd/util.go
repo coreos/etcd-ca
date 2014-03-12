@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"syscall"
+
+	"github.com/coreos/etcd-ca/third_party/code.google.com/p/go.crypto/ssh/terminal"
 
 	"github.com/coreos/etcd-ca/depot"
 )
@@ -22,20 +26,27 @@ func InitDepot(path string) error {
 }
 
 func createPassPhrase() ([]byte, error) {
-	var pass1, pass2 string
 	fmt.Print("Enter passphrase (empty for no passphrase): ")
-	fmt.Scanln(&pass1)
-	fmt.Print("Enter same passphrase again: ")
-	fmt.Scanln(&pass2)
-	if pass1 != pass2 {
+	pass1, err := terminal.ReadPassword(syscall.Stdin)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Print("\nEnter same passphrase again: ")
+	pass2, err := terminal.ReadPassword(syscall.Stdin)
+	if err != nil {
+		return nil, err
+	}
+	fmt.Println()
+
+	if bytes.Compare(pass1, pass2) != 0 {
 		return nil, errors.New("Passphrases do not match.")
 	}
-	return []byte(pass1), nil
+	return pass1, nil
 }
 
 func askPassPhrase(name string) []byte {
-	var pass string
-	fmt.Printf("Enter passphrase for %v (empty for no passphrase): ", name)
-	fmt.Scanln(&pass)
-	return []byte(pass)
+	fmt.Println("Enter passphrase for %v (empty for no passphrase): ", name)
+	pass, _ := terminal.ReadPassword(syscall.Stdin)
+	fmt.Println()
+	return pass
 }
