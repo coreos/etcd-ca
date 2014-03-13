@@ -38,8 +38,8 @@ func TestCreateCertificateHost(t *testing.T) {
 		t.Fatal("Failed to check signature:", err)
 	}
 
-	if err = rawCrt.VerifyHostname(csrHostname); err != nil {
-		t.Fatal("Failed to verify hostname:", err)
+	if err = rawCrt.VerifyHostname(csrIP); err != nil {
+		t.Fatal("Failed to verify CommonName:", err)
 	}
 
 	if rawCrt.SerialNumber.Uint64() != authStartSerialNumber {
