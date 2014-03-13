@@ -1,13 +1,27 @@
-## etcd-ca
+# etcd-ca
 
-A very simple CA manager written in Go. Primarly used for coreos/etcd SSL/TLS
-testing.
+A simple certificate manager written in Go. Easy to use with limited capability.
 
 [![Build Status](https://drone.io/github.com/coreos/etcd-ca/status.png)](https://drone.io/github.com/coreos/etcd-ca/latest)
 
-### Examples
+## Common Uses
 
-Create a new CA:
+etcd-ca allows you to build your own certificate system:
+
+1. Create certificate authority
+2. Create, issue and export host certificates
+3. Manage host identities
+4. Deploy a Public Key Infrastructure
+
+Primarly used for [coreos/etcd](https://github.com/coreos/etcd) SSL/TLS testing.
+
+## Certificate architecture
+
+etcd-ca inits a certificate authority, and issues certificates using the authority only. It indicates the length of authorization path is at most 2.
+
+## Examples
+
+### Create a new certificate authority:
 
 ```
 $ ./etcd-ca init
@@ -15,45 +29,68 @@ Created ca/key
 Created ca/crt
 ```
 
-Create a new certificate:
+### Create a new host identity, including keypair and certificate request:
 
 ```
-$ ./etcd-ca new-cert host1
-Created host1/key
-Created host1/csr
+$ ./etcd-ca new-cert alice
+Created alice/key
+Created alice/csr
 ```
 
-Sign the new certificate for host1 with the ca:
+### Sign certificate request of host and generate the certificate:
 
 ```
-$ ./etcd-ca sign host1
-Created host1/crt from host1/csr signed by ca.key
+$ ./etcd-ca sign alice
+Created alice/crt from alice/csr signed by ca.key
 ```
 
-Export the certificate chain for host1. With no args it exports this CA's
-certificate.
+### Export the certificate chain for host:
 
 ```
-$ ./etcd-ca chain host1
+$ ./etcd-ca chain alice
 ----BEGIN CERTIFICATE-----
 CA certificate body
 -----END CERTIFICATE-----
 ----BEGIN CERTIFICATE-----
-host1 certificate body
+alice certificate body
 -----END CERTIFICATE-----
 ```
 
-Package up a certificate and key for export to a server:
+### Package up the certificate and key of host:
 
 ```
-$ ./etcd-ca export host1 > host1.tar
+$ ./etcd-ca export alice > alice.tar
 ```
 
-Get the status of all certificates:
+### List the status of all certificates:
 
 ```
 $ ./etcd-ca status
 ca: WARN (60 days until expiration)
-host1: OK (120 days until expiration)
-host2: Unsigned
+alice: OK (120 days until expiration)
+bob: Unsigned
 ```
+
+## Getting Started
+
+### Building
+
+You can build etcd-ca from source:
+
+```
+$ git clone https://github.com/coreos/etcd-ca
+$ cd etcd-ca
+$ ./build
+```
+
+This will generate a binary called `./bin/etcd-ca`
+
+## Project Details
+
+### Contributing
+
+See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting patches and contacting developers via IRC and mailing lists.
+
+### License
+
+fleet is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
