@@ -9,9 +9,9 @@ import (
 )
 
 const (
-	binPath  = "../bin/etcd-ca"
-	depotDir = ".etcd-ca-test"
-	hostname = "host1"
+	binPath    = "../bin/etcd-ca"
+	depotDir   = ".etcd-ca-test"
+	hostname   = "host1"
 	passphrase = "123456"
 )
 

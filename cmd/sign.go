@@ -15,10 +15,10 @@ func NewSignCommand() cli.Command {
 		Name:        "sign",
 		Usage:       "Sign certificate request",
 		Description: "Sign certificate request with CA, and generate certificate for the host.",
-		Flags:       []cli.Flag{
+		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block of CA"},
 		},
-		Action:      newSignAction,
+		Action: newSignAction,
 	}
 }
 
@@ -34,43 +34,36 @@ func newSignAction(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	var passphrase []byte
-	if c.IsSet("passphrase") {
-		passphrase = []byte(c.String("passphrase"))
-	} else {
-		passphrase = askPassPhrase("CA key")
-	}
-
 	csr, err := depot.GetCertificateSigningRequest(d, name)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got certificate request error:", err)
+		fmt.Fprintln(os.Stderr, "Get certificate request error:", err)
 		os.Exit(1)
 	}
 	crt, err := depot.GetCertificateAuthority(d)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got CA certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Get CA certificate error:", err)
 		os.Exit(1)
 	}
 	info, err := depot.GetCertificateAuthorityInfo(d)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got CA certificate info error:", err)
+		fmt.Fprintln(os.Stderr, "Get CA certificate info error:", err)
 		os.Exit(1)
 	}
-	key, err := depot.GetEncryptedPrivateKeyAuthority(d, passphrase)
+	key, err := depot.GetEncryptedPrivateKeyAuthority(d, getPassPhrase(c, "CA key"))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got CA key error:", err)
+		fmt.Fprintln(os.Stderr, "Get CA key error:", err)
 		os.Exit(1)
 	}
 
 	crtHost, err := pkix.CreateCertificateHost(crt, info, key, csr)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Created certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Create certificate error:", err)
 		os.Exit(1)
 	} else {
 		fmt.Printf("Created %s/crt from %s/csr signed by ca/key\n", name, name)
 	}
 
 	if err = depot.PutCertificateHost(d, name, crtHost); err != nil {
-		fmt.Fprintln(os.Stderr, "Saved certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Save certificate error:", err)
 	}
 }

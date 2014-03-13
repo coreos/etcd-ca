@@ -137,15 +137,15 @@ func TestDepotGetFile(t *testing.T) {
 		t.Fatal("Failed putting file into Depot:", err)
 	}
 
-	fi, dataRead, err := d.GetFile(tag)
+	file, err := d.GetFile(tag)
 	if err != nil {
 		t.Fatal("Failed getting file from Depot:", err)
 	}
-	if bytes.Compare(dataRead, []byte(data)) != 0 {
+	if bytes.Compare(file.Data, []byte(data)) != 0 {
 		t.Fatal("Failed getting the previous data")
 	}
 
-	if fi.Mode() != tag.perm {
+	if file.Info.Mode() != tag.perm {
 		t.Fatal("Failed setting permission")
 	}
 }

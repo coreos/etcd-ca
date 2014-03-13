@@ -13,7 +13,7 @@ func NewChainCommand() cli.Command {
 	return cli.Command{
 		Name:        "chain",
 		Usage:       "Export certificate chain",
-		Description: "Export the certificate chain for host1. With no args it exports this CA's certificate.",
+		Description: "Export the certificate chain for host. With no args it exports this CA's certificate.",
 		Action:      newChainAction,
 	}
 }
@@ -21,7 +21,7 @@ func NewChainCommand() cli.Command {
 func newChainAction(c *cli.Context) {
 	crt, err := depot.GetCertificateAuthority(d)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got CA certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Get CA certificate error:", err)
 		os.Exit(1)
 	}
 	// Should not fail if creating from depot
@@ -35,13 +35,13 @@ func newChainAction(c *cli.Context) {
 
 	crtHost, err := depot.GetCertificateHost(d, name)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "Got certificate error:", err)
+		fmt.Fprintln(os.Stderr, "Get certificate error:", err)
 		os.Exit(1)
 	}
 	crtHostBytes, _ := crtHost.Export()
 
 	if err = crt.VerifyHost(crtHost, name); err != nil {
-		fmt.Fprintln(os.Stderr, "Failed verifying certificate chain:", err)
+		fmt.Fprintln(os.Stderr, "Verify certificate chain error:", err)
 		os.Exit(1)
 	}
 
