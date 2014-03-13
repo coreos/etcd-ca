@@ -17,6 +17,7 @@ func NewInitCommand() cli.Command {
 		Description: "Create Certificate Authority, including certificate, key and extra information file.",
 		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block"},
+			cli.IntFlag{"rsa-bits", 4096, "Bit size of RSA keypair to generate"},
 		},
 		Action: initAction,
 	}
@@ -40,7 +41,7 @@ func initAction(c *cli.Context) {
 		}
 	}
 
-	key, err := pkix.CreateRSAKey()
+	key, err := pkix.CreateRSAKey(c.Int("rsa-bits"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Create RSA Key error:", err)
 		os.Exit(1)
