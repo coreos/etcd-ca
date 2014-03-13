@@ -18,7 +18,7 @@ func NewNewCertCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block"},
 			cli.StringFlag{"ip", "127.0.0.1", "IP address of the host"},
-			cli.IntFlag{"rsa-bits", 4096, "Bit size of RSA keypair to generate"},
+			cli.IntFlag{"key-bits", 4096, "Bit size of RSA keypair to generate"},
 		},
 		Action: newCertAction,
 	}
@@ -48,7 +48,7 @@ func newCertAction(c *cli.Context) {
 		}
 	}
 
-	key, err := pkix.CreateRSAKey(c.Int("rsa-bits"))
+	key, err := pkix.CreateRSAKey(c.Int("key-bits"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Create RSA Key error:", err)
 		os.Exit(1)
