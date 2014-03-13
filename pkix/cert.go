@@ -5,6 +5,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -98,7 +99,7 @@ func (c *Certificate) VerifyHost(hostCert *Certificate, name string) error {
 	roots.AddCert(c.crt)
 
 	verifyOpts := x509.VerifyOptions{
-		DNSName: name,
+		DNSName: "",
 		// no intermediates are allowed for now
 		Intermediates: nil,
 		Roots:         roots,
@@ -113,13 +114,17 @@ func (c *Certificate) VerifyHost(hostCert *Certificate, name string) error {
 		return err
 	}
 
+	units := rawHostCrt.Subject.OrganizationalUnit
+	if len(units) != 1 || units[0] != name {
+		return fmt.Errorf("unmatched hostname between %v and %v", units, name)
+	}
+
 	chains, err := rawHostCrt.Verify(verifyOpts)
 	if err != nil {
 		return err
 	}
 	if len(chains) != 1 {
-		err = errors.New("internal error: verify chain number != 1")
-		return err
+		return errors.New("internal error: verify chain number != 1")
 	}
 	return nil
 }

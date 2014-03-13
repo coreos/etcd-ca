@@ -6,7 +6,7 @@ import (
 )
 
 func TestCreateCertificateAuthority(t *testing.T) {
-	key, err := CreateRSAKey()
+	key, err := CreateRSAKey(rsaBits)
 	if err != nil {
 		t.Fatal("Failed creating rsa key:", err)
 	}
@@ -24,7 +24,7 @@ func TestCreateCertificateAuthority(t *testing.T) {
 		t.Fatal("Failed to check signature:", err)
 	}
 
-	if err = rawCrt.VerifyHostname(authHostname); err != nil {
+	if rawCrt.Subject.OrganizationalUnit[0] != authHostname {
 		t.Fatal("Failed to verify hostname:", err)
 	}
 

@@ -15,12 +15,10 @@ import (
 
 const (
 	rsaPrivateKeyPEMBlockType = "RSA PRIVATE KEY"
-	// key bits for RSA generation
-	rsaBits = 1024
 )
 
 // CreateRSAKey creates a new Key using RSA algorithm
-func CreateRSAKey() (*Key, error) {
+func CreateRSAKey(rsaBits int) (*Key, error) {
 	priv, err := rsa.GenerateKey(rand.Reader, rsaBits)
 	if err != nil {
 		return nil, err

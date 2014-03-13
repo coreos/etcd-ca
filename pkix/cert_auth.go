@@ -19,13 +19,13 @@ var (
 	authPkixName = pkix.Name{
 		Country:            []string{"USA"},
 		Organization:       []string{"etcd-ca"},
-		OrganizationalUnit: nil,
+		OrganizationalUnit: []string{authHostname},
 		Locality:           nil,
 		Province:           nil,
 		StreetAddress:      nil,
 		PostalCode:         nil,
 		SerialNumber:       "",
-		CommonName:         authHostname,
+		CommonName:         "",
 	}
 	// Build CA based on RFC5280
 	authTemplate = x509.Certificate{
