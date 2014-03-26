@@ -14,7 +14,7 @@ const (
 	crtInfoSuffix = ".crt.info"
 	csrSuffix     = ".csr"
 	pubKeySuffix  = ".pub.key"
-	privKeySuffix = ".priv.key"
+	privKeySuffix = ".key"
 )
 
 const (
