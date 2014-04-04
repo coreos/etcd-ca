@@ -6,6 +6,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"errors"
+	"net"
 
 	"github.com/coreos/etcd-ca/third_party/github.com/jstemmer/pkcs10"
 )
@@ -29,6 +30,11 @@ var (
 )
 
 func CreateCertificateSigningRequest(key *Key, name string, ip string) (*CertificateSigningRequest, error) {
+	// Sanity check on the ip value
+	if net.ParseIP(ip) == nil {
+		return nil, errors.New("failed to parse ip")
+	}
+
 	csrPkixName.OrganizationalUnit = []string{name}
 	csrPkixName.CommonName = ip
 	csrTemplate := &pkcs10.CertificateSigningRequest{Subject: csrPkixName}
