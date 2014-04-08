@@ -55,6 +55,12 @@ The same request should be rejected this time:
 curl --cacert server-chain.pem https://127.0.0.1:4001/v2/keys/foo -XPUT -d value=bar -v
 ```
 
+And curl will tell you that:
+
+```
+curl: (35) error:14094412:SSL routines:SSL3_READ_BYTES:sslv3 alert bad certificate
+```
+
 Give the CA signed cert to the server:
 
 ```
