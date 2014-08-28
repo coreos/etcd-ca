@@ -28,6 +28,7 @@ func newChainAction(c *cli.Context) {
 	crtBytes, _ := crt.Export()
 
 	if len(c.Args()) == 0 {
+		fmt.Fprintln(os.Stderr, "Outputting CA certificate body:")
 		fmt.Printf("%s", crtBytes)
 		return
 	}
@@ -45,5 +46,6 @@ func newChainAction(c *cli.Context) {
 		os.Exit(1)
 	}
 
+	fmt.Fprintln(os.Stderr, "Outputting CA and Host certificate body:")
 	fmt.Printf("%s%s", crtBytes, crtHostBytes)
 }
