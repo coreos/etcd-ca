@@ -2,13 +2,17 @@ package pkix
 
 import (
 	"bytes"
+	"crypto"
+	"crypto/ecdsa"
 	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
 	"crypto/x509/pkix"
+	"encoding/asn1"
 	"encoding/pem"
 	"errors"
+	"math/big"
 	"net"
-
-	"github.com/coreos/etcd-ca/third_party/github.com/jstemmer/pkcs10"
 )
 
 const (
@@ -37,9 +41,12 @@ func CreateCertificateSigningRequest(key *Key, name string, ip string) (*Certifi
 
 	csrPkixName.OrganizationalUnit = []string{name}
 	csrPkixName.CommonName = ip
-	csrTemplate := &pkcs10.CertificateSigningRequest{Subject: csrPkixName}
+	csrTemplate := &x509.CertificateRequest{
+		Subject:     csrPkixName,
+		IPAddresses: []net.IP{net.ParseIP(ip)},
+	}
 
-	csrBytes, err := pkcs10.CreateCertificateSigningRequest(rand.Reader, csrTemplate, key.Private)
+	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, csrTemplate, key.Private)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +57,7 @@ type CertificateSigningRequest struct {
 	// derBytes is always set for valid Certificate
 	derBytes []byte
 
-	cr *pkcs10.CertificateSigningRequest
+	cr *x509.CertificateRequest
 }
 
 // NewCertificateSigningRequestFromDER inits CertificateSigningRequest from DER-format bytes
@@ -78,19 +85,60 @@ func (c *CertificateSigningRequest) buildPKCS10CertificateSigningRequest() error
 	}
 
 	var err error
-	c.cr, err = pkcs10.ParseCertificateSigningRequest(c.derBytes)
+	c.cr, err = x509.ParseCertificateRequest(c.derBytes)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-// GetRawCertificateSigningRequest returns a copy of this certificate request as an pkcs10.Certificate
-func (c *CertificateSigningRequest) GetRawCertificateSigningRequest() (*pkcs10.CertificateSigningRequest, error) {
+// GetRawCertificateSigningRequest returns a copy of this certificate request as an x509.CertificateRequest.
+func (c *CertificateSigningRequest) GetRawCertificateSigningRequest() (*x509.CertificateRequest, error) {
 	if err := c.buildPKCS10CertificateSigningRequest(); err != nil {
 		return nil, err
 	}
 	return c.cr, nil
+}
+
+// CheckSignature verifies a signature made by the key on a CSR, such
+// as on the CSR itself.
+func checkSignature(csr *x509.CertificateRequest, algo x509.SignatureAlgorithm, signed, signature []byte) error {
+	var hashType crypto.Hash
+	switch algo {
+	case x509.SHA1WithRSA, x509.ECDSAWithSHA1:
+		hashType = crypto.SHA1
+	case x509.SHA256WithRSA, x509.ECDSAWithSHA256:
+		hashType = crypto.SHA256
+	case x509.SHA384WithRSA, x509.ECDSAWithSHA384:
+		hashType = crypto.SHA384
+	case x509.SHA512WithRSA, x509.ECDSAWithSHA512:
+		hashType = crypto.SHA512
+	default:
+		return x509.ErrUnsupportedAlgorithm
+	}
+	if !hashType.Available() {
+		return x509.ErrUnsupportedAlgorithm
+	}
+	h := hashType.New()
+	h.Write(signed)
+	digest := h.Sum(nil)
+	switch pub := csr.PublicKey.(type) {
+	case *rsa.PublicKey:
+		return rsa.VerifyPKCS1v15(pub, hashType, digest, signature)
+	case *ecdsa.PublicKey:
+		ecdsaSig := new(struct{ R, S *big.Int })
+		if _, err := asn1.Unmarshal(signature, ecdsaSig); err != nil {
+			return err
+		}
+		if ecdsaSig.R.Sign() <= 0 || ecdsaSig.S.Sign() <= 0 {
+			return errors.New("x509: ECDSA signature contained zero or negative values")
+		}
+		if !ecdsa.Verify(pub, digest, ecdsaSig.R, ecdsaSig.S) {
+			return errors.New("x509: ECDSA verification failure")
+		}
+		return nil
+	}
+	return x509.ErrUnsupportedAlgorithm
 }
 
 // CheckSignature verifies that the signature is a valid signature
@@ -99,7 +147,8 @@ func (c *CertificateSigningRequest) CheckSignature() error {
 	if err := c.buildPKCS10CertificateSigningRequest(); err != nil {
 		return err
 	}
-	return c.cr.CheckSignature()
+
+	return checkSignature(c.cr, c.cr.SignatureAlgorithm, c.cr.RawTBSCertificateRequest, c.cr.Signature)
 }
 
 // Export returns PEM-format bytes
