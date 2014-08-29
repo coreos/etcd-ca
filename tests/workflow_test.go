@@ -40,16 +40,16 @@ func TestWorkflow(t *testing.T) {
 	}
 
 	stdout, stderr, err = run(binPath, "chain")
-	if stderr != "" || err != nil {
-		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
+	if err != nil {
+		t.Fatalf("Received unexpected error: %v", err)
 	}
 	if strings.Count(stdout, "CERTIFICATE") != 2 {
 		t.Fatalf("Received insufficient CERTIFICATE: %v", stdout)
 	}
 
 	stdout, stderr, err = run(binPath, "chain", hostname)
-	if stderr != "" || err != nil {
-		t.Fatalf("Received unexpected error: %v, %v", stderr, err)
+	if err != nil {
+		t.Fatalf("Received unexpected error: %v", err)
 	}
 	if strings.Count(stdout, "CERTIFICATE") != 4 {
 		t.Fatalf("Received insufficient CERTIFICATE: %v", stdout)
