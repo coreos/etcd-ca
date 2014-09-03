@@ -37,6 +37,8 @@ Created alice/key
 Created alice/csr
 ```
 
+etcd-ca uses 127.0.0.1 for IP SAN in default. If etcd has peer address $etcd_ip other than 127.0.0.1, run `./etcd-ca new-cert --ip $etcd_ip alice` instead.
+
 ### Sign certificate request of host and generate the certificate:
 
 ```
