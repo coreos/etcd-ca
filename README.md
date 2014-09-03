@@ -62,6 +62,8 @@ alice certificate body
 $ ./etcd-ca export alice > alice.tar
 ```
 
+Because etcd takes unencrypted key for `-key-file` and `-peer-key-file`, you should use `./etcd-ca export --insecure alice > alice.tar` to export private key.
+
 ### List the status of all certificates:
 
 ```
