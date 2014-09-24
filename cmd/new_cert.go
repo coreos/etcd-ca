@@ -20,8 +20,8 @@ func NewNewCertCommand() cli.Command {
 			cli.StringFlag{"ip", "127.0.0.1", "IP address of the host"},
 			cli.IntFlag{"key-bits", 4096, "Bit size of RSA keypair to generate"},
 			cli.StringFlag{"domain", "", "Use domain instead of IP address for SAN"},
-			cli.StringFlag{"organization", "etcd-ca", "CA Certificate organization"},
-			cli.StringFlag{"country", "USA", "CA Certificate country"},
+			cli.StringFlag{"organization", "etcd-ca", "Certificate organization"},
+			cli.StringFlag{"country", "USA", "Certificate country"},
 		},
 		Action: newCertAction,
 	}
