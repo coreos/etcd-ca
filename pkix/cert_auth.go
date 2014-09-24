@@ -17,8 +17,8 @@ const (
 
 var (
 	authPkixName = pkix.Name{
-		Country:            []string{"USA"},
-		Organization:       []string{"etcd-ca"},
+		Country:            nil,
+		Organization:       nil,
 		OrganizationalUnit: []string{authHostname},
 		Locality:           nil,
 		Province:           nil,
@@ -33,8 +33,7 @@ var (
 		Subject:      authPkixName,
 		// NotBefore is set to be 10min earlier to fix gap on time difference in cluster
 		NotBefore: time.Now().Add(-600).UTC(),
-		// 10-year lease
-		NotAfter: time.Now().AddDate(10, 0, 0).UTC(),
+		NotAfter: time.Time{},
 		// Used for certificate signing only
 		KeyUsage: x509.KeyUsageCertSign,
 
@@ -62,12 +61,15 @@ var (
 
 // CreateCertificateAuthority creates Certificate Authority using existing key.
 // CertificateAuthorityInfo returned is the extra infomation required by Certificate Authority.
-func CreateCertificateAuthority(key *Key) (*Certificate, *CertificateAuthorityInfo, error) {
+func CreateCertificateAuthority(key *Key, years int, organization string, country string) (*Certificate, *CertificateAuthorityInfo, error) {
 	subjectKeyId, err := GenerateSubjectKeyId(key.Public)
 	if err != nil {
 		return nil, nil, err
 	}
 	authTemplate.SubjectKeyId = subjectKeyId
+	authTemplate.NotAfter = time.Now().AddDate(years, 0, 0).UTC()
+	authTemplate.Subject.Country = []string{country}
+	authTemplate.Subject.Organization = []string{organization}
 
 	crtBytes, err := x509.CreateCertificate(rand.Reader, &authTemplate, &authTemplate, key.Public, key.Private)
 	if err != nil {

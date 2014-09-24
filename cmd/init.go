@@ -18,6 +18,9 @@ func NewInitCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block"},
 			cli.IntFlag{"key-bits", 4096, "Bit size of RSA keypair to generate"},
+			cli.IntFlag{"years", 10, "How long until the CA certificate expires"},
+			cli.StringFlag{"organization", "etcd-ca", "CA Certificate organization"},
+			cli.StringFlag{"country", "USA", "CA Certificate country"},
 		},
 		Action: initAction,
 	}
@@ -49,7 +52,7 @@ func initAction(c *cli.Context) {
 		fmt.Println("Created ca/key")
 	}
 
-	crt, info, err := pkix.CreateCertificateAuthority(key)
+	crt, info, err := pkix.CreateCertificateAuthority(key, c.Int("years"), c.String("organization"), c.String("country"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Create certificate error:", err)
 		os.Exit(1)
