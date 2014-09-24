@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"errors"
 	"math/big"
 	"net"
 	"time"
@@ -65,10 +64,9 @@ func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo,
 	}
 
 	ip := net.ParseIP(rawCsr.Subject.CommonName)
-	if ip == nil {
-		return nil, errors.New("failed to parse ip")
+	if ip != nil {
+		hostTemplate.IPAddresses = []net.IP{ip}
 	}
-	hostTemplate.IPAddresses = []net.IP{ip}
 
 	rawCrtAuth, err := crtAuth.GetRawCertificate()
 	if err != nil {
