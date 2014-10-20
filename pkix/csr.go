@@ -17,8 +17,8 @@ const (
 
 var (
 	csrPkixName = pkix.Name{
-		Country:            []string{"USA"},
-		Organization:       []string{"etcd-ca"},
+		Country:            []string{},
+		Organization:       []string{},
 		OrganizationalUnit: nil,
 		Locality:           nil,
 		Province:           nil,
@@ -29,14 +29,20 @@ var (
 	}
 )
 
-func CreateCertificateSigningRequest(key *Key, name string, ip string) (*CertificateSigningRequest, error) {
+func CreateCertificateSigningRequest(key *Key, name string, ip string, domain string, organization string, country string) (*CertificateSigningRequest, error) {
 	// Sanity check on the ip value
 	if net.ParseIP(ip) == nil {
 		return nil, errors.New("failed to parse ip")
 	}
 
 	csrPkixName.OrganizationalUnit = []string{name}
-	csrPkixName.CommonName = ip
+	if domain != "" {
+		csrPkixName.CommonName = domain
+	} else {
+		csrPkixName.CommonName = ip
+	}
+	csrPkixName.Organization = []string{organization}
+	csrPkixName.Country = []string{country}
 	csrTemplate := &pkcs10.CertificateSigningRequest{Subject: csrPkixName}
 
 	csrBytes, err := pkcs10.CreateCertificateSigningRequest(rand.Reader, csrTemplate, key.Private)

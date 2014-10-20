@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 	"crypto/x509/pkix"
-	"errors"
 	"math/big"
 	"net"
 	"time"
@@ -20,7 +19,7 @@ var (
 		// NotBefore is set to be 10min earlier to fix gap on time difference in cluster
 		NotBefore: time.Now().Add(-600).UTC(),
 		// 10-year lease
-		NotAfter: time.Now().AddDate(10, 0, 0).UTC(),
+		NotAfter: time.Time{},
 		// Used for certificate signing only
 		KeyUsage: 0,
 
@@ -48,7 +47,7 @@ var (
 
 // CreateCertificateHost creates certificate for host.
 // The arguments include CA certificate, CA certificate info, CA key, certificate request.
-func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo, keyAuth *Key, csr *CertificateSigningRequest) (*Certificate, error) {
+func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo, keyAuth *Key, csr *CertificateSigningRequest, years int) (*Certificate, error) {
 	hostTemplate.SerialNumber.Set(info.SerialNumber)
 	info.IncSerialNumber()
 
@@ -59,16 +58,17 @@ func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo,
 
 	hostTemplate.Subject = rawCsr.Subject
 
+	hostTemplate.NotAfter = time.Now().AddDate(years, 0, 0).UTC()
+
 	hostTemplate.SubjectKeyId, err = GenerateSubjectKeyId(rawCsr.PublicKey)
 	if err != nil {
 		return nil, err
 	}
 
 	ip := net.ParseIP(rawCsr.Subject.CommonName)
-	if ip == nil {
-		return nil, errors.New("failed to parse ip")
+	if ip != nil {
+		hostTemplate.IPAddresses = []net.IP{ip}
 	}
-	hostTemplate.IPAddresses = []net.IP{ip}
 
 	rawCrtAuth, err := crtAuth.GetRawCertificate()
 	if err != nil {
