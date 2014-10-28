@@ -11,7 +11,7 @@ func TestCreateCertificateAuthority(t *testing.T) {
 		t.Fatal("Failed creating rsa key:", err)
 	}
 
-	crt, info, err := CreateCertificateAuthority(key)
+	crt, info, err := CreateCertificateAuthority(key, 5, "test", "US")
 	if err != nil {
 		t.Fatal("Failed creating certificate authority:", err)
 	}

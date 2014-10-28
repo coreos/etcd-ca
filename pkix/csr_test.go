@@ -7,7 +7,7 @@ import (
 
 const (
 	csrHostname = "host1"
-	csrIP = "127.0.0.1"
+	csrIP       = "127.0.0.1"
 	csrPEM      = `-----BEGIN CERTIFICATE REQUEST-----
 MIIBgTCB7QIBADBGMQwwCgYDVQQGEwNVU0ExEDAOBgNVBAoTB2V0Y2QtY2ExEDAO
 BgNVBAsTB3NlcnZlcjIxEjAQBgNVBAMTCTEyNy4wLjAuMTCBnTALBgkqhkiG9w0B
@@ -50,9 +50,13 @@ func TestCreateCertificateSigningRequest(t *testing.T) {
 		t.Fatal("Failed creating rsa key:", err)
 	}
 
-	csr, err := CreateCertificateSigningRequest(key, csrHostname, csrIP)
+	csr, err := CreateCertificateSigningRequest(key, csrHostname, csrIP, "127.0.0.1", "example", "US")
 	if err != nil {
 		t.Fatal("Failed creating certificate request:", err)
+	}
+
+	if err = csr.CheckSignature(); err != nil {
+		t.Fatal("Failed cheching signature in certificate request:", err)
 	}
 
 	rawCsr, err := csr.GetRawCertificateSigningRequest()
@@ -60,9 +64,6 @@ func TestCreateCertificateSigningRequest(t *testing.T) {
 		t.Fatal("Failed getting raw certificate request:", err)
 	}
 
-	if err = rawCsr.CheckSignature(); err != nil {
-		t.Fatal("Failed cheching signature in certificate request:", err)
-	}
 
 	if csrHostname != rawCsr.Subject.OrganizationalUnit[0] {
 		t.Fatalf("Expect OrganizationalUnit to be %v instead of %v", csrHostname, rawCsr.Subject.OrganizationalUnit[0])
@@ -108,10 +109,10 @@ func TestBadCertificateSigningRequest(t *testing.T) {
 	}
 
 	if _, err = csr.GetRawCertificateSigningRequest(); err == nil {
-		t.Fatal("Expect not to get pkcs10.CertificateSigningRequest")
+		t.Fatal("Expect not to get x509.CertificateRequest")
 	}
 
 	if err = csr.CheckSignature(); err == nil {
-		t.Fatal("Expect not to get pkcs10.CertificateSigningRequest")
+		t.Fatal("Expect not to get x509.CertificateRequest")
 	}
 }
