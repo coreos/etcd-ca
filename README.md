@@ -97,4 +97,4 @@ See [CONTRIBUTING](CONTRIBUTING.md) for details on submitting patches and contac
 
 ### License
 
-fleet is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
+etcd-ca is under the Apache 2.0 license. See the [LICENSE](LICENSE) file for details.
