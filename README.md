@@ -89,6 +89,12 @@ $ ./build
 
 This will generate a binary called `./bin/etcd-ca`
 
+### EtcD storage
+
+By default, etcd-ca stores secrets on your local filesystem.
+
+To store secrets in etcd, use the `--depot etcd` flag.  When this flag is enabled, the --depot-path flag is used to specify the etcd URL.
+
 ## Project Details
 
 ### Contributing

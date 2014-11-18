@@ -7,10 +7,6 @@ import (
 	"path/filepath"
 )
 
-const (
-	DefaultFileDepotDir = ".etcd-ca"
-)
-
 // FileDepot is a implementation of Depot using file system
 type FileDepot struct {
 	// Absolute path of directory that holds all files

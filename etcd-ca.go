@@ -16,6 +16,7 @@ func main() {
 	app.Usage = "A very simple CA manager written in Go. Primarly used for coreos/etcd SSL/TLS testing."
 	app.Flags = []cli.Flag{
 		cli.StringFlag{"depot-path", depot.DefaultFileDepotDir, "Location to store certificates, keys and other files."},
+		cli.StringFlag{"depot", depot.DepotType, "Depot to use for storage: file or etcd."},
 	}
 	app.Commands = []cli.Command{
 		cmd.NewInitCommand(),
@@ -26,7 +27,7 @@ func main() {
 		cmd.NewStatusCommand(),
 	}
 	app.Before = func(c *cli.Context) error {
-		cmd.InitDepot(c.String("depot-path"))
+		cmd.InitDepot(c.String("depot"), c.String("depot-path"))
 		return nil
 	}
 

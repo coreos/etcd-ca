@@ -5,7 +5,8 @@ import (
 )
 
 const (
-	DepotType = "file"
+	DepotType           = "file"
+	DefaultFileDepotDir = ".etcd-ca"
 )
 
 // Tag includes name and permission requirement

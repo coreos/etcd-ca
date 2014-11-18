@@ -17,11 +17,17 @@ var (
 	d depot.Depot
 )
 
-func InitDepot(path string) error {
+func InitDepot(depotType, path string) error {
 	if d == nil {
 		var err error
-		if d, err = depot.NewFileDepot(path); err != nil {
-			return err
+		if depotType == "etcd" {
+			if d, err = depot.NewEtcdDepot(path); err != nil {
+				return err
+			}
+		} else {
+			if d, err = depot.NewFileDepot(path); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
