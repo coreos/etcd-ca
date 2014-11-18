@@ -140,9 +140,15 @@ func decryptEncryptedKeyTarFile(file *TarFile, passphrase []byte) (*TarFile, err
 }
 
 func generateTarFile(file *depot.File, newName string) (*TarFile, error) {
-	header, err := tar.FileInfoHeader(file.Info, "")
-	if err != nil {
-		return nil, err
+	header := &tar.Header{}
+	if file.Info == nil {
+		header.Size = int64(len(file.Data))
+	} else {
+		var err error
+		header, err = tar.FileInfoHeader(file.Info, "")
+		if err != nil {
+			return nil, err
+		}
 	}
 	header.Name = newName
 	header.Mode |= 0644
