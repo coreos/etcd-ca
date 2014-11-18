@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	d *depot.FileDepot
+	d depot.Depot
 )
 
 func InitDepot(path string) error {
