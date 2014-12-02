@@ -1,7 +1,9 @@
 package pkix
 
 import (
+	"fmt"
 	"bytes"
+	"strings"
 	"crypto"
 	"crypto/ecdsa"
 	"crypto/rand"
@@ -33,23 +35,44 @@ var (
 	}
 )
 
-func CreateCertificateSigningRequest(key *Key, name string, ip string, domain string, organization string, country string) (*CertificateSigningRequest, error) {
-	// Sanity check on the ip value
-	if net.ParseIP(ip) == nil {
-		return nil, errors.New("failed to parse ip")
+func ParseAndValidateIPs(ip_list string) (res []net.IP, e error) {
+	ips := strings.Split(ip_list, ",")
+	for _, ip := range ips {
+		parsedIP := net.ParseIP(ip)
+		if parsedIP == nil {
+			return nil, fmt.Errorf("failed to parse ip %s", ip)
+		}
+		res = append(res, parsedIP)
+	}
+	return
+}
+
+func CreateCertificateSigningRequest(key *Key, name string, ip_list string, domain_list string, organization string, country string) (*CertificateSigningRequest, error) {
+	// Sanity check on the ip values
+	ips, err := ParseAndValidateIPs(ip_list)
+	if err != nil {
+		return nil, err
+	}
+
+	domains := strings.Split(domain_list, ",")
+	if domain_list == "" {
+		domains = nil
 	}
 
 	csrPkixName.OrganizationalUnit = []string{name}
-	if domain != "" {
-		csrPkixName.CommonName = domain
+	if len(domains) != 0 {
+		csrPkixName.CommonName = domains[0]
+	} else if len(ips) != 0 {
+		csrPkixName.CommonName = ips[0].String()
 	} else {
-		csrPkixName.CommonName = ip
+		return nil, errors.New("no valided domain nor ip provided")
 	}
 	csrPkixName.Organization = []string{organization}
 	csrPkixName.Country = []string{country}
 	csrTemplate := &x509.CertificateRequest{
 		Subject:     csrPkixName,
-		IPAddresses: []net.IP{net.ParseIP(ip)},
+		IPAddresses: ips,
+		DNSNames:    domains,
 	}
 
 	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, csrTemplate, key.Private)
