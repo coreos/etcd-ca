@@ -81,7 +81,7 @@ bob: Unsigned
 
 ### Building
 
-etcd-ca must be built with Go 1.2+. You can build etcd-ca from source:
+etcd-ca must be built with Go 1.3+. You can build etcd-ca from source:
 
 ```
 $ git clone https://github.com/coreos/etcd-ca
