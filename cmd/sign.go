@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd-ca/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 
 	"github.com/coreos/etcd-ca/depot"
 	"github.com/coreos/etcd-ca/pkix"
@@ -16,8 +16,8 @@ func NewSignCommand() cli.Command {
 		Usage:       "Sign certificate request",
 		Description: "Sign certificate request with CA, and generate certificate for the host.",
 		Flags: []cli.Flag{
-			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block of CA"},
-			cli.IntFlag{"years", 10, "How long until the certificate expires"},
+			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block of CA", ""},
+			cli.IntFlag{"years", 10, "How long until the certificate expires", ""},
 		},
 		Action: newSignAction,
 	}
