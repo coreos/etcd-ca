@@ -1,19 +1,14 @@
 #!/bin/bash -e
 
-proj_dir="github.com/coreos"
-proj_name="etcd-ca"
-proj_path=$proj_dir/$proj_name
+ORG_PATH="github.com/coreos"
+REPO_PATH="${ORG_PATH}/etcd-ca"
 
-echo $proj_path
+export GOPATH=${PWD}/gopath
 
-echo "Installing Godep and cover"
-go get github.com/tools/godep
-go get golang.org/x/tools/cmd/cover
+rm -f $GOPATH/src/${REPO_PATH}
+mkdir -p $GOPATH/src/${ORG_PATH}
+ln -s ${PWD} $GOPATH/src/${REPO_PATH}
 
-echo "Building Project ${proj_path}"
-# Build using Godep sandbox in Godeps/_workspace
-godep go build
+eval $(go env)
 
-echo "Binary is available at ./bin/etcd-ca"
-mkdir -p bin
-mv etcd-ca ./bin
+go build -o bin/etcd-ca ${REPO_PATH}
