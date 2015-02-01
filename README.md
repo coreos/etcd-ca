@@ -91,6 +91,10 @@ $ ./build
 
 This will generate a binary called `./bin/etcd-ca`
 
+### Examples
+
+[generate certificates for etcd](./hack/etcd_example.sh)
+
 ## Project Details
 
 ### Contributing
