@@ -7,9 +7,8 @@ import (
 	"os"
 	"syscall"
 
-	"github.com/codegangsta/cli"
-	"golang.org/x/crypto/ssh/terminal"
-
+	"github.com/coreos/etcd-ca/Godeps/_workspace/src/github.com/codegangsta/cli"
+	"github.com/coreos/etcd-ca/Godeps/_workspace/src/golang.org/x/crypto/ssh/terminal"
 	"github.com/coreos/etcd-ca/depot"
 )
 
