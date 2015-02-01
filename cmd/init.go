@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd-ca/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 
 	"github.com/coreos/etcd-ca/depot"
 	"github.com/coreos/etcd-ca/pkix"
@@ -16,11 +16,11 @@ func NewInitCommand() cli.Command {
 		Usage:       "Create Certificate Authority",
 		Description: "Create Certificate Authority, including certificate, key and extra information file.",
 		Flags: []cli.Flag{
-			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block"},
-			cli.IntFlag{"key-bits", 4096, "Bit size of RSA keypair to generate"},
-			cli.IntFlag{"years", 10, "How long until the CA certificate expires"},
-			cli.StringFlag{"organization", "etcd-ca", "CA Certificate organization"},
-			cli.StringFlag{"country", "USA", "CA Certificate country"},
+			cli.StringFlag{"passphrase", "", "Passphrase to encrypt private-key PEM block", ""},
+			cli.IntFlag{"key-bits", 4096, "Bit size of RSA keypair to generate", ""},
+			cli.IntFlag{"years", 10, "How long until the CA certificate expires", ""},
+			cli.StringFlag{"organization", "etcd-ca", "CA Certificate organization", ""},
+			cli.StringFlag{"country", "USA", "CA Certificate country", ""},
 		},
 		Action: initAction,
 	}

@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/coreos/etcd-ca/third_party/github.com/codegangsta/cli"
+	"github.com/codegangsta/cli"
 
 	"github.com/coreos/etcd-ca/depot"
 	"github.com/coreos/etcd-ca/pkix"
@@ -24,8 +24,8 @@ func NewExportCommand() cli.Command {
 		Usage:       "Export host certificate and key",
 		Description: "Package up a certificate and key for export to a server. Without args, it exports CA certificate and key.",
 		Flags: []cli.Flag{
-			cli.BoolFlag{"insecure", "Export private key without encryption"},
-			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block"},
+			cli.BoolFlag{"insecure", "Export private key without encryption", ""},
+			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block", ""},
 		},
 		Action: newExportAction,
 	}
