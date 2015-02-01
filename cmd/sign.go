@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/codegangsta/cli"
-
+	"github.com/coreos/etcd-ca/Godeps/_workspace/src/github.com/codegangsta/cli"
 	"github.com/coreos/etcd-ca/depot"
 	"github.com/coreos/etcd-ca/pkix"
 )

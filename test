@@ -14,7 +14,7 @@ fi
 # Unit tests
 echo
 for mod in $PKG; do
-  mod_path=$proj_path/$mod
+  mod_path=$REPO_PATH/$mod
   go test -i $mod_path
   if $cover; then
     godep go test -cover -coverprofile="$mod"_cover.out -v $mod_path
