@@ -73,3 +73,8 @@ func getPassPhrase(c *cli.Context, name string) []byte {
 		return askPassPhrase(name)
 	}
 }
+
+func isFileNotExist(err error) bool {
+	perr, ok := err.(*os.PathError)
+	return ok && perr.Err.Error() == "no such file or directory"
+}

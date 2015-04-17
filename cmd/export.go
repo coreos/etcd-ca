@@ -55,6 +55,11 @@ func newExportAction(c *cli.Context) {
 		os.Exit(1)
 	}
 
+	if _, err := depot.GetCertificateAuthority(d); isFileNotExist(err) {
+		fmt.Fprintln(os.Stderr, "Please run 'etcd-ca init' to initial the depot.")
+		os.Exit(1)
+	}
+
 	var files []*TarFile
 	var err error
 	if len(c.Args()) == 0 {
