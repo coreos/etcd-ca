@@ -56,6 +56,9 @@ func newSignAction(c *cli.Context) {
 	crt, err := depot.GetCertificateAuthority(d)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Get CA certificate error:", err)
+		if isFileNotExist(err) {
+			fmt.Fprintln(os.Stderr, "Please run 'etcd-ca init' to initial the depot.")
+		}
 		os.Exit(1)
 	}
 	info, err := depot.GetCertificateAuthorityInfo(d)
