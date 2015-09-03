@@ -77,7 +77,7 @@ func newCertAction(c *cli.Context) {
 		fmt.Fprintln(os.Stderr, "Create certificate request error:", err)
 		os.Exit(1)
 	} else {
-		fmt.Printf("Created %s/crt\n", name)
+		fmt.Printf("Created %s/csr\n", name)
 	}
 
 	if err = depot.PutCertificateSigningRequest(d, name, csr); err != nil {
