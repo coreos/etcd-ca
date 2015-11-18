@@ -60,7 +60,7 @@ var (
 
 // CreateCertificateHost creates certificate for host.
 // The arguments include CA certificate, CA certificate info, CA key, certificate request.
-func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo, keyAuth *Key, csr *CertificateSigningRequest, years int) (*Certificate, error) {
+func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo, keyAuth *Key, csr *CertificateSigningRequest, years int, serverAuth, clientAuth bool) (*Certificate, error) {
 	hostTemplate.SerialNumber.Set(info.SerialNumber)
 	info.IncSerialNumber()
 
@@ -72,6 +72,14 @@ func CreateCertificateHost(crtAuth *Certificate, info *CertificateAuthorityInfo,
 	hostTemplate.Subject = rawCsr.Subject
 
 	hostTemplate.NotAfter = time.Now().AddDate(years, 0, 0).UTC()
+
+	hostTemplate.ExtKeyUsage = []x509.ExtKeyUsage{}
+	if serverAuth {
+		hostTemplate.ExtKeyUsage = append(hostTemplate.ExtKeyUsage, x509.ExtKeyUsageServerAuth)
+	}
+	if clientAuth {
+		hostTemplate.ExtKeyUsage = append(hostTemplate.ExtKeyUsage, x509.ExtKeyUsageClientAuth)
+	}
 
 	hostTemplate.SubjectKeyId, err = GenerateSubjectKeyId(rawCsr.PublicKey)
 	if err != nil {

@@ -31,6 +31,8 @@ func NewSignCommand() cli.Command {
 		Flags: []cli.Flag{
 			cli.StringFlag{"passphrase", "", "Passphrase to decrypt private-key PEM block of CA", ""},
 			cli.IntFlag{"years", 10, "How long until the certificate expires", ""},
+			cli.BoolTFlag{"server", "Allow server authentication", ""},
+			cli.BoolTFlag{"client", "Allow client authentication", ""},
 		},
 		Action: newSignAction,
 	}
@@ -72,7 +74,7 @@ func newSignAction(c *cli.Context) {
 		os.Exit(1)
 	}
 
-	crtHost, err := pkix.CreateCertificateHost(crt, info, key, csr, c.Int("years"))
+	crtHost, err := pkix.CreateCertificateHost(crt, info, key, csr, c.Int("years"), c.Bool("server"), c.Bool("client"))
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "Create certificate error:", err)
 		os.Exit(1)
