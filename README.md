@@ -4,6 +4,10 @@ A simple certificate manager written in Go. Easy to use with limited capability.
 
 [![Build Status](https://drone.io/github.com/coreos/etcd-ca/status.png)](https://drone.io/github.com/coreos/etcd-ca/latest)
 
+# DEPRECATED
+
+etcd now uses [cfssl](https://github.com/cloudflare/cfssl) as the official tool to generate certificates. cfssl provides more features and is well maintained. We provide an example using the tool [here](https://github.com/coreos/etcd/tree/master/hack/tls-setup).
+
 ## Common Uses
 
 etcd-ca allows you to build your own certificate system:
