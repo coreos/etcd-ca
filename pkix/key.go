@@ -123,7 +123,7 @@ func (k *Key) ExportEncryptedPrivate(password []byte) ([]byte, error) {
 		return nil, errors.New("only RSA private key is supported")
 	}
 
-	privPEMBlock, err := x509.EncryptPEMBlock(rand.Reader, rsaPrivateKeyPEMBlockType, privBytes, password, x509.PEMCipher3DES)
+	privPEMBlock, err := x509.EncryptPEMBlock(rand.Reader, rsaPrivateKeyPEMBlockType, privBytes, password, x509.PEMCipherAES256)
 	if err != nil {
 		return nil, err
 	}
