@@ -83,7 +83,13 @@ func newCertAction(c *cli.Context) {
 	if err = depot.PutCertificateSigningRequest(d, name, csr); err != nil {
 		fmt.Fprintln(os.Stderr, "Save certificate request error:", err)
 	}
-	if err = depot.PutEncryptedPrivateKeyHost(d, name, key, passphrase); err != nil {
-		fmt.Fprintln(os.Stderr, "Save key error:", err)
+	if len(passphrase) == 0 {
+		if err = depot.PutPrivateKeyHost(d, name, key); err != nil {
+			fmt.Fprintln(os.Stderr, "Save key error:", err)
+		}
+	} else {
+		if err = depot.PutEncryptedPrivateKeyHost(d, name, key, passphrase); err != nil {
+			fmt.Fprintln(os.Stderr, "Save key error:", err)
+		}
 	}
 }
